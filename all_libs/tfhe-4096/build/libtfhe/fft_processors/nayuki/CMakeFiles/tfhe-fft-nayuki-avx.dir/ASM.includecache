@@ -1,0 +1,12 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project25Update/tfhe-4096/src/libtfhe/fft_processors/nayuki/fft-x8664-avx-reverse.s
+
+/home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project25Update/tfhe-4096/src/libtfhe/fft_processors/nayuki/fft-x8664-avx.s
+
