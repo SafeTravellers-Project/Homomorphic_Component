@@ -26,7 +26,7 @@ Project25Update/
 │   ├── Register.cpp    # Biometric registration
 │   ├── Verify.cpp      # Biometric verification
 │   └── ...             # Other source files
-├── CMakeLists.txt      # Build configuration
+├── CMakeLists.txt      # Build configuration  (Change line 5 of this file to represent the project library at destination)
 └── README.md           # Project documentation
 ```
 ## Build Instructions
