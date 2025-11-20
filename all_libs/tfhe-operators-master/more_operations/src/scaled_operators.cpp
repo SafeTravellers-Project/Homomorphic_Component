@@ -248,7 +248,7 @@ void SFTOperator::sign(LweSample * slweOut,
   double positive)
 {
   // The boot heaviside
-  SFTBootFFT::boot_Sign(slweOut, bk, slweIn, positive);
+  FTBootFFT::boot_Sign(slweOut, bk, slweIn, positive);
 
   // Update the scale
   //slweOut->scale = 1/positive;
@@ -287,7 +287,7 @@ lweAddTo(slweOut, lweTemp, extract_params);
 
 // f(x) = x
 
-void FTOperator::identity(LweSample * slweOut,
+void SFTOperator::identity(LweSample * slweOut,
   LweBootstrappingKeyFFT * bk1,
   LweBootstrappingKeyFFT * bk2,
   LweSample * slweIn,
@@ -314,7 +314,7 @@ void FTOperator::identity(LweSample * slweOut,
 // f(x) = x if x > 0
 //      = 0 if x < 0
 
-void FTOperator::relu(LweSample * slweOut,
+void SFTOperator::relu(LweSample * slweOut,
   LweBootstrappingKeyFFT * bk1,
   LweBootstrappingKeyFFT * bk2,
   LweSample * slweIn,
@@ -336,11 +336,11 @@ void FTOperator::relu(LweSample * slweOut,
   */
 
   // f(x) = |x|/2
-  FTOperator::absolute(slweTemp2, bk1, slweIn, plaintext_size, 2*rescale);
+  SFTOperator::absolute(slweTemp2, bk1, slweIn, plaintext_size, 2*rescale);
   //slweTemp2->scale = slweTemp2->scale/2;    // here the rescaling by two is not a real rescaling we are actually dividing by 2
 
   // f(x) = x/2
-  FTOperator::identity(slweTemp1, bk1, bk2, slweIn, plaintext_size, 2*rescale);
+  SFTOperator::identity(slweTemp1, bk1, bk2, slweIn, plaintext_size, 2*rescale);
   //slweTemp1->scale = slweTemp1->scale/2;    // here the rescaling by two is not a real rescaling we are actually dividing by 2
 
   // keyswitch temp1 from 1->2

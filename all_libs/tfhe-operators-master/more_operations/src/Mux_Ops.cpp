@@ -197,7 +197,7 @@ lweCopy(slweDiff, samp1, lwe_params_1);    // d_1
 lweSubTo(slweDiff, samp2, lwe_params_1);   // d_1 - d_2
 LweSample * slweSign = new LweSample(lwe_params_2);
 
-FTOperator::sign(slweSign, boot_key_12, slweDiff, doubleSign);
+SFTOperator::sign(slweSign, boot_key_12, slweDiff, doubleSign);
 
 LweSample * slweDiffRot = new LweSample(lwe_params_2);
 lweNoiselessTrivial(slweDiffRot, doubleSignx2, lwe_params_2);

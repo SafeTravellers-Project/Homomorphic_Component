@@ -1,4 +1,4 @@
-# Install script for directory: /home/olive/Documents/CEA/Projects/SAFETravellers/Codes/tfhe-operators-master/new_tfhe
+# Install script for directory: /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project25Update/all_libs/tfhe-operators-master/new_tfhe
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/olive/Documents/CEA/Projects/SAFETravellers/Codes/tfhe-operators-master/new_tfhe/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project25Update/all_libs/tfhe-operators-master/new_tfhe/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
