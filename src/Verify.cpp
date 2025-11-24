@@ -51,7 +51,9 @@ int main(int argc, char *argv[])
 
   // Read the SEAL parameters from the file
 
-std::ifstream bin_sealparam_handler("../data/System Parameters/sealparam.txt", std::ios::in | std::ios::binary);
+cout << "Reading SEAL parameters from file..." << endl;
+
+std::ifstream bin_sealparam_handler("../data/System_Parameters/sealparam.txt", std::ios::in | std::ios::binary);
     if (!bin_sealparam_handler) {
         std::cerr << "Seal param file did not open!" << std::endl;
         return 1;
@@ -77,21 +79,24 @@ PublicKey init_public_key;
 
 Encryptor init_encryptor(context, init_public_key);
 Evaluator evaluator(context);
+
+cout << "SEAL parameters and keys loaded successfully." << endl;
 /*   Get in all the TFHE params and Keys*/
 
-//FILE * tgsw_oparams_file = fopen("../data/System Parameters/params_tgsw_out.txt" , "r");
+cout << "Reading TFHE parameters from file..." << endl;
+//FILE * tgsw_oparams_file = fopen("../data/System_Parameters/params_tgsw_out.txt" , "r");
 //TGswParams * out_tgsw_params = new_tGswParams_fromFile(tgsw_oparams_file);
 //fclose(tgsw_oparams_file);
-FILE * lwe_oparams_file = fopen("../data/System Parameters/params_lwe_out.txt" , "r");
+FILE * lwe_oparams_file = fopen("../data/System_Parameters/params_lwe_out.txt" , "r");
 LweParams * out_lwe_params = new_lweParams_fromFile(lwe_oparams_file);
 fclose(lwe_oparams_file);
-FILE * tlwe_iparams_file = fopen("../data/System Parameters/params_tlwe_in.txt" , "r");
+FILE * tlwe_iparams_file = fopen("../data/System_Parameters/params_tlwe_in.txt" , "r");
 TLweParams * init_tlwe_params = new_tLweParams_fromFile(tlwe_iparams_file);
 fclose(tlwe_iparams_file);
-FILE * tlwe_oparams_file = fopen("../data/System Parameters/params_tlwe_out.txt" , "r");
+FILE * tlwe_oparams_file = fopen("../data/System_Parameters/params_tlwe_out.txt" , "r");
 TLweParams * out_tlwe_params = new_tLweParams_fromFile(tlwe_oparams_file);
 fclose(tlwe_oparams_file);
-FILE * lwe_iparams_file = fopen("../data/System Parameters/params_lwe_in.txt" , "r");
+FILE * lwe_iparams_file = fopen("../data/System_Parameters/params_lwe_in.txt" , "r");
 LweParams * init_lwe_params = new_lweParams_fromFile(lwe_iparams_file);
 fclose(lwe_iparams_file);
 // FILE * boot_key_file = fopen("../data/Traveller/bootK.data" , "r");
@@ -114,17 +119,22 @@ fclose(lwe_iparams_file);
     return -1;
   }
 
+  cout << "TFHE parameters loaded successfully." << endl; 
 // Assuming test values are read into a Plaintext object named 'test'
 Plaintext test;
 Plaintext test_inverse;
 Plaintext testSquare;
 Plaintext testCos;
 
-std::string fileName_test = "../data/E-Gate/Test_Biometrics1";// + std::string(argv[2]);
+std::string fileName_test = "../data/E-Gate/Test_Biometrics2";// + std::string(argv[2]);
 dataIO::readPlaintext(&test, fileName_test, vector_size, precision, p, 1);  
+cout << "Test Plaintext read successfully." << endl;
 dataIO::readPlaintext(&test_inverse, fileName_test, vector_size, precision, p, 0);
+cout << "Inverse Test Plaintext read successfully." << endl;
 dataIO::readPlaintextSquare(&testSquare, fileName_test, vector_size, precision, p);
+cout << "Test Square Plaintext read successfully." << endl;
 dataIO::readPlaintextCosine(&testCos, fileName_test, vector_size, precision, p,1);
+cout << "Test Cosine Plaintext read successfully." << endl;
 
 
 
@@ -139,7 +149,7 @@ init_encryptor.encrypt(test, testSEALCipher);
 init_encryptor.encrypt(test_inverse, InvtestSEALCipher);
 init_encryptor.encrypt(testSquare, testSEALCipherSquare);
 init_encryptor.encrypt(testCos, testSEALCosineCipher);
-
+cout << "Test Plaintext encrypted successfully." << endl;
 //evaluator.square(testSEALCipher, testSEALCipherSquare_auto);
 
 //cout << "The size of the ciphertext tests is " << testSEALCipher.size() << endl;
@@ -193,7 +203,7 @@ Plaintext Threshold_value;
 dataIO::makePlaintext(&Threshold_value, threshold_val, N_seal, p);
 
 
-//cout << "Threshold value taken in... "  << endl;
+cout << "Threshold value taken in... "  << endl;
 RelinKeys relin_key;
 clock_t bin_start1=clock();
 // //Option 1: Using the encrypted test
@@ -201,7 +211,7 @@ evaluator.multiply(modelSEALCipher,testSEALCipher,distanceVV);
 //cout << "The sie of the ciphertext after multiplying ab is " << distanceVV.size() << endl;
 if (parms.poly_modulus_degree() > 2047) 
 {
-//cout << "Copying Relin keys" << endl;
+cout << "Copying Relin keys" << endl;
 
 filebuf bin_sealrelinK_handler;
   bin_sealrelinK_handler.open("../data/Traveller/sealrelinK.txt", ios::in | ios::binary);
@@ -224,7 +234,7 @@ evaluator.add_inplace(distanceVV, modelSEALCipherSquare);
 distanceVV3= modelSEALCipherSquare;
 distance_diff=distanceVV;
 threshold_dist= distance_diff;
-//cout << "Now computing the diff from Threshold distance " << endl;
+cout << "Now computing the diff from Threshold distance " << endl;
 evaluator.negate_inplace(threshold_dist);
 evaluator.add_plain_inplace(threshold_dist,Threshold_value);
 clock_t bin_end1=clock();
@@ -256,7 +266,7 @@ while (context_data->next_context_data())
  //   cout << "      Noise budget at this level: " << decryptor.invariant_noise_budget(distanceVV1) << " bits" << endl;
     //cout << "\\" << endl;
     //cout << " \\-->";
-    //cout << " End of chain reached" << endl << endl;
+    cout << " End of chain reached" << endl << endl;
 
 //Option 2: Using the plaintext test
 // evaluator.multiply_plain(modelSEALCipher, test, distanceVV);
@@ -407,7 +417,7 @@ seal2tfhe::ciphertext_seal_exit(tlwe_temp1, distance_diff, context);
 tLweExtractLweSampleIndex(lwe_temp1, tlwe_temp1, 4095, init_lwe_params, init_tlwe_params);
 clock_t bin_end2=clock();
 
-// //cout << "Reached here, no segfault" << endl;
+cout << "Reached here, no segfault" << endl;
 // torusTemp = lweSymDecrypt(lwe_temp1, init_lwe_key, p);
 // intTemp = modSwitchFromTorus32(torusTemp, p);
 // doubleTemp = ((double) intTemp - p*(intTemp >= p/2))/pow10[2*(precision-1)];
@@ -444,35 +454,41 @@ clock_t bin_end2=clock();
 // /**************************************************************** */
 
 // /******************************************************************************** */
+
+cout << "Copying the bookk fules and KSKeys" << endl;
 FILE * boot_key_file = fopen("../data/Traveller/bootK.data" , "r"); 
 LweBootstrappingKey * boot_key = new_lweBootstrappingKey_fromFile(boot_key_file);
 LweBootstrappingKeyFFT * boot_key_fft = new_LweBootstrappingKeyFFT(boot_key);
-
-
+fclose(boot_key_file);
+cout << "Reading the KS key for switching from initial lwe key to medium lwe key" << endl;
 FILE * ks_med_key_file = fopen("../data/Traveller/KSKmed.data" , "r");
 LweKeySwitchKey * ks_med_key = new_lweKeySwitchKey_fromFile(ks_med_key_file);
 fclose(ks_med_key_file);
 
-//cout << "Reading the KS key for switching from HE key to EGate key" << endl;
-FILE * ks_key_file = fopen("../data/E-Gate/KSK.data", "r");
-LweKeySwitchKey * ks_key = new_lweKeySwitchKey_fromFile(ks_key_file);
-fclose(ks_key_file);
-
 
 // Check if the lwekey exists in the E-Gate folder
-// cout << "Reading the lwekey for EGate" << endl;
+ cout << "Reading the lwekey for EGate" << endl;
   FILE * out2_lwekey_file = fopen("../data/E-Gate/lwe_out2.txt", "r");
-//  if (out2_lwekey_file == NULL) {
-    // cout << "E-Gate not registered previously not found. Generating E-Gate keys..." << endl;
-    // EGateKeyGen::generateEGatekeys();
-    // FILE * out2_lwekey_file = fopen("../data/E-Gate/lwe_out2.txt", "r");
-    // LweKey * out2_lwe_key = new_lweKey_fromFile(out2_lwekey_file);
-    // fclose(out2_lwekey_file);
-    // } else {
+  if (out2_lwekey_file == NULL) {
+    cout << "E-Gate not registered previously not found. Generating E-Gate keys..." << endl;
+    EGateKeyGen::generateEGatekeys();
+    FILE * out2_lwekey_file = fopen("../data/E-Gate/lwe_out2.txt", "r");
     LweKey * out2_lwe_key = new_lweKey_fromFile(out2_lwekey_file);
     fclose(out2_lwekey_file);
-    // }
+    } else {
+    LweKey * out2_lwe_key = new_lweKey_fromFile(out2_lwekey_file);
+    fclose(out2_lwekey_file);
+     }
 
+cout << "Reading the KS key for switching from HE key to EGate key" << endl;
+ FILE * ks_key_file = fopen("../data/E-Gate/KSK.data", "r");
+ //if (!ks_key_file) {
+ //   perror("fopen ../data/E-Gate/KSK.data");
+ //   return 1;
+//}
+ LweKeySwitchKey * ks_key = new_lweKeySwitchKey_fromFile(ks_key_file);
+ fclose(ks_key_file);
+ cout << "KS keys and Bootstrapping keys copied successfully." << endl;
 
 
  LweSample * lweDeltaM = new_LweSample(out_lwe_params); // Defining the variable that will store the value of the sign bootstrapping.
@@ -503,14 +519,20 @@ FILE * out1_lweKey_file = fopen("../data/HEComp/lwe_out1.txt" , "r");
 LweKey * out1_lwe_key= new_lweKey_fromFile(out1_lweKey_file);
 fclose(out1_lweKey_file); // Reading the already predefined Lwe keys from file; Predefined while generating keys for HE component.
 
+// here we need to read in the lwe key of the E-Gate to do the final decryption
+
+ cout << "Reading the KS key for switching from medium lwe key to out lwe key" << endl;
 FILE * ks_inout_key_file = fopen("../data/Traveller/KSKinout.data" , "r");
 LweKeySwitchKey * ks_inout_key = new_lweKeySwitchKey_fromFile(ks_inout_key_file);
 fclose(ks_inout_key_file);
-
+cout << "KS keys copied successfully." << endl;
 LweSample * lweDelta_boot = new_LweSample(out_lwe_params);
 lweKeySwitch(lweDelta_boot,ks_inout_key,lweDeltaM);
+LweSample * lweDelta_boot_final = new_LweSample(out_lwe_params);
+lweKeySwitch(lweDelta_boot_final,ks_key,lweDelta_boot);
 
-torusTemp = lweSymDecrypt(lweDeltaM, out1_lwe_key, torusDivision);
+cout << "Key switch done successfully." << endl;
+torusTemp = lweSymDecrypt(lweDelta_boot, out1_lwe_key, torusDivision);
 int sign = modSwitchFromTorus32(torusTemp, torusDivision);
 if (sign == 1)
     cout << "The distance is less than the threshold, same person (Accept). " << endl;
