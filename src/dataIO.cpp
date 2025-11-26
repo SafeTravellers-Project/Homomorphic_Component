@@ -1,5 +1,9 @@
 
 #include <experimental/filesystem>
+#include <fstream>
+#include <sstream>
+#include <iostream>
+#include <stdio.h>
 namespace fs = std::experimental::filesystem;
 //std::experimental::
 #include "dataIO.h"
@@ -44,16 +48,12 @@ void dataIO::makePlaintext(seal::Plaintext * plaintext, int32_t value, int size,
   plaintext->set_zero();
   // Temporary variable to store a coefficient
   int32_t intTemp = value ;
- // while (intTemp < 0)
- //   intTemp += modulus;
-  //cout << "Writing to plaintext at location "  << size-1 << '\n';  
   *plaintext->data(size-1) = intTemp;
   }
 
 
 
 
-//template<typename TORUS>
 void dataIO::readPlaintext(seal::Plaintext * plaintext, std::string path, int size, int precision, uint32_t modulus, int invert)
 {
   // For a quick power of 10
@@ -61,12 +61,9 @@ void dataIO::readPlaintext(seal::Plaintext * plaintext, std::string path, int si
   {
       1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000
   };
-//std::cout << "precision multiply= " << pow10[precision-1] <<'\n';
   FILE * f;
-  // f = fopen("../data/model", "r");
   const char * char_path = path.c_str();
   f = fopen(char_path, "r");
-   //std::cout << " File opened" << '\n';
   // Get an appropriate plaintext for that size
   int pt_size = 4096;
   plaintext->resize(pt_size);
@@ -76,16 +73,11 @@ void dataIO::readPlaintext(seal::Plaintext * plaintext, std::string path, int si
   float floatTemp;
   int32_t intTemp;
   int coef_place;
- // float coff_arr[size];
- // std::cout << " Inside ReadPLaintext and going to scan the values and convert into Intergers, the value of size is :" << size << '\n';
   fscanf(f, "%*[^\n]\n");  // Jump a line
 
   for (int i = 0; i < size; i++)
   {
     fscanf(f, "%f ", &floatTemp);
-    //if (i < 3)
-    //  std::cout << "float temp from the file " << floatTemp << " " << "Is float temp big or small than 0" << (floatTemp > 0) << '\n';
-    //floatTemp+=0.1; // comment out this line later
     if (floatTemp > 0)
       intTemp = (int) (floatTemp * pow10[precision-1] + 0.5);   // The +0.5 is there for rounding and not truncating
     else
@@ -96,7 +88,6 @@ void dataIO::readPlaintext(seal::Plaintext * plaintext, std::string path, int si
       std::cout << "WARNING: the coefficient is bigger than the modulus: " << intTemp << '\n';
       return;
     }
-    //std::cout << "inttemo from float temp " << intTemp<< '\n';
     while (intTemp < 0)
       intTemp += modulus;
 
@@ -104,16 +95,12 @@ void dataIO::readPlaintext(seal::Plaintext * plaintext, std::string path, int si
       coef_place = i;
     else
       coef_place = pt_size - i - 1;
-
-    //coff_arr[coef_place] = floatTemp;
-   // cout << "The value of coef_place is : " << coef_place << ",  and the Inttemp is " << intTemp << endl;
     *plaintext->data(coef_place) = intTemp;
-    //cout << "Done, doing next" << endl;
   }
   fclose(f);
 }
 
-//template<typename TORUS>
+
 void dataIO::readPlaintextSquare(seal::Plaintext * plaintext, std::string path, int size, int precision, uint32_t modulus)
 {
   // For a quick power of 10
@@ -123,7 +110,6 @@ void dataIO::readPlaintextSquare(seal::Plaintext * plaintext, std::string path, 
   };
 
   FILE * f;
-  // f = fopen("../data/voxCeleb/truncated_log.txt", "r");
   const char * char_path = path.c_str();
   f = fopen(char_path, "r");
 
@@ -145,10 +131,7 @@ void dataIO::readPlaintextSquare(seal::Plaintext * plaintext, std::string path, 
   for (int i = 0; i < size; i++)
   {
     fscanf(f, "%f ", &floatTemp);
-    //floatTemp+=0.1; // comment out this line later
     floatTemp2 = floatTemp*floatTemp;
-    //if (i < 3)
-    //  std::cout << "float temo from the file " << floatTemp2 << " " << "Is float temp big or small than 0" << (floatTemp2 > 0) << '\n';
     // Here we wil multiply by the square of the precision
     if (floatTemp2 > 0)
       intTemp = (int) (floatTemp2 * pow10[2*(precision-1)] + 0.5);   // The +0.5 is there for rounding and not truncating
@@ -156,8 +139,6 @@ void dataIO::readPlaintextSquare(seal::Plaintext * plaintext, std::string path, 
       intTemp = (int) (floatTemp2 * pow10[2*(precision-1)] - 0.5);   // The +0.5 is there for rounding and not truncating
 
     sum += intTemp;
-    //std::cout << floatTemp2 << '\n';
-    //*result += floatTemp2;
   }
 
   if (sum > modulus)
@@ -168,9 +149,6 @@ void dataIO::readPlaintextSquare(seal::Plaintext * plaintext, std::string path, 
   }
 
   *plaintext->data(pt_size-1) = sum;
-  //*plaintext->data(size-1) = sum % modulus;
-  //for (int i =0;i<10;i++)
-  //  std::cout << "sqsumres= " << *result << " averge " << *result/(double) size <<'\n';
   fclose(f);
 }
 
@@ -184,7 +162,6 @@ void dataIO::readPlaintextCosine(seal::Plaintext * plaintext, std::string path, 
   };
 
   FILE * f;
-  // f = fopen("../data/voxCeleb/truncated_log.txt", "r");
   const char * char_path = path.c_str();
   f = fopen(char_path, "r");
 
@@ -199,7 +176,6 @@ void dataIO::readPlaintextCosine(seal::Plaintext * plaintext, std::string path, 
   float float_arr[size];
   float Temp_float_sum=0;
   // The variable where we will store the sum
-  //uint32_t sum = 0;
   int32_t finalint[size];
   int coef_place;
 
@@ -208,20 +184,10 @@ void dataIO::readPlaintextCosine(seal::Plaintext * plaintext, std::string path, 
   {
     fscanf(f, "%f ", &floatTemp[i]);
     floatTemp2 = floatTemp[i]*floatTemp[i];
-    //std::cout << "floatTemp: " << floatTemp << '\n';
-
-    //if (i < 3)
-    //  std::cout << "float temo from the file " << floatTemp << " " << "Is float temp big or small than 0" << (floatTemp > 0) << '\n';
-    //floatTemp+=0.1; // comment out this line later
-
-      //Temp_int = (int) (floatTemp2 * pow10[2*(precision-1)] + 0.5);   // The +0.5 is there for rounding and not truncating
+    
     Temp_float_sum += floatTemp2;
 
   }
-  //std::cout << "sumTemp2: "  << Temp_float_sum << '\n';
-  //sum = (int) (sqrt(Temp_float_sum) * pow10[(precision-2)] + 0.5);   // The +0.5 is there for rounding and not truncating
-  //std::cout << "The sum is: " << sum << '\n';
-  //std::cout << "The integers are " << (intTemp[0]/(int)sum) << " " << (intTemp[1]/(int) sum) <<" "<< (intTemp[2]/(int) sum)  <<'\n';
 
   for (int i =0 ; i < size ;i++){  // now computing the a_i/\sum a_i^2 or b_i/\sum b_i^2
     {
@@ -294,60 +260,80 @@ void dataIO::mulPlaintext(seal::Plaintext * plaintext1, seal::Plaintext * plaint
 
 }
 
-
-/*void dataIO::readPlaintextSquareSumRoot(seal::Plaintext * plaintext, std::string path, int size, int precision, uint32_t modulus)
+//this function takes in a file and then encrypts the plaintext read from the file into 3 types of ciphertexts we need and saves them to path_to
+void dataIO::EncryptF2F(std::string path_to, std::string path_f, seal::Encryptor & encryptor, int vector_size, int precision, uint32_t modulus, int invert)
 {
-  // For a quick power of 10
-  static long int pow10[12] =
-  {
-      1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000
-  };
 
-  FILE * f;
-  // f = fopen("../data/voxCeleb/truncated_log.txt", "r");
-  const char * char_path = path.c_str();
-  f = fopen(char_path, "r");
+Plaintext val;
+Plaintext valSquare;
+Plaintext valCos;
 
-  // Get an appropriate plaintext for that size
-  plaintext->resize(size);
-  plaintext->set_zero();
+dataIO::readPlaintext(&val, path_f, vector_size, precision, modulus, invert);  
+dataIO::readPlaintextSquare(&valSquare, path_f, vector_size, precision, modulus);
+dataIO::readPlaintextCosine(&valCos, path_f, vector_size, precision, modulus,invert);
 
-  // Temporary variable to store a coefficient
-  float floatTemp;
-  int64_t intTemp;
 
-  // The variable where we will store the sum
-  uint32_t sum = 0;
-  uint32_t sumroot = 0;
+Ciphertext SEALCipher;
+Ciphertext SEALCipherSquare;
+Ciphertext SEALCosineCipher;
 
-  fscanf(f, "%*[^\n]\n");  // Jump a line
+encryptor.encrypt(val, SEALCipher);
+encryptor.encrypt(valSquare, SEALCipherSquare);
+encryptor.encrypt(valCos, SEALCosineCipher);
 
-  for (int i = 0; i < size; i++)
-  {
-    fscanf(f, "%f ", &floatTemp);
-    floatTemp = floatTemp*floatTemp;
+//Writing the ciphertexts to file
+filebuf bin_sealciph_handler;
+bin_sealciph_handler.open(path_to + "ciph", std::ios::out | ios::binary);
+ if (!bin_sealciph_handler.is_open()) {
+     throw std::runtime_error("Error opening file for writing  cipher!");
+ }
+std::ostream os(&bin_sealciph_handler);
+SEALCipher.save(os);
+bin_sealciph_handler.close();
 
-    // Here we wil multiply by the square of the precision
-    if (floatTemp > 0)
-      intTemp = (int) (floatTemp * pow10[2*(precision-1)] + 0.5);   // The +0.5 is there for rounding and not truncating
-    else
-      intTemp = (int) (floatTemp * pow10[2*(precision-1)] - 0.5);   // The +0.5 is there for rounding and not truncating
-
-    sum += intTemp;
-  }
-  sumroot = (int) sqrt(sum);
-//  std::cout << "The sum: " << sum << " and the root is " << sumroot << '\n';
-
-  if (sumroot > modulus)
-  {
-    std::cout << "WARNING: the sum of the squares of the coefficients is bigger than the modulus: " <<   '\n';
-    std::cout << "The sum: " << sumroot << '\n';
-    return;
-  }
-
-  *plaintext->data(size-1) = sumroot;
-  //*plaintext->data(size-1) = sum % modulus;
-
-  fclose(f);
+filebuf bin_sealsqciph_handler;
+bin_sealsqciph_handler.open(path_to+"sqciph", std::ios::out | ios::binary);
+ if (!bin_sealsqciph_handler.is_open()) {
+     throw std::runtime_error("Error opening file for writing cipher square!");
 }
-*/
+std::ostream os2(&bin_sealsqciph_handler);
+SEALCipherSquare.save(os2);
+bin_sealsqciph_handler.close();
+
+filebuf bin_sealcosineciph_handler;
+bin_sealcosineciph_handler.open(string(path_to)+"cosineciph", std::ios::out | ios::binary);
+ if (!bin_sealcosineciph_handler.is_open()) {
+     throw std::runtime_error("Error opening file for writing cipher cosine!");
+ }
+std::ostream os3(&bin_sealcosineciph_handler);
+SEALCosineCipher.save(os3);
+bin_sealcosineciph_handler.close();
+
+}
+
+void dataIO::Read_F(std::string path,
+seal::SEALContext &context,seal::Ciphertext &outCipher,seal::Ciphertext &outCipherSquare,seal::Ciphertext &outCosine)
+{
+  filebuf bin_sealciph_handler;
+bin_sealciph_handler.open(path+"/ciph", ios::in | ios::binary);
+istream is2(&bin_sealciph_handler);
+ if (!bin_sealciph_handler.is_open()) {
+     throw std::runtime_error("Error opening file for writing  cipher!");
+ }
+outCipher.load(context,is2);
+bin_sealciph_handler.close();
+
+filebuf bin_sealsqciph_handler;
+bin_sealsqciph_handler.open(path+"/sqciph", ios::in | ios::binary);
+istream is3(&bin_sealsqciph_handler);
+outCipherSquare.load(context,is3);  
+bin_sealsqciph_handler.close();
+
+
+filebuf bin_sealcosineciph_handler;
+bin_sealcosineciph_handler.open(path+"/cosineciph", ios::in | ios::binary);
+istream is4(&bin_sealcosineciph_handler);
+outCosine.load(context,is4);  
+bin_sealcosineciph_handler.close();
+
+}

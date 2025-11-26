@@ -158,8 +158,7 @@ void customlweCreateKeySwitchKey(LweKeySwitchKey* result, const LweKey* in_key, 
                 }
                 result->ks[i][j][h].b += dtot32(noise[index]);
                 cout << " The b part has been filled with a*s + noise" << endl;
-                // Torus32 mess = (in_key->key[i] * h) * (1 << (32 - (j + 1) * basebit));
-                // lweSymEncryptWithExternalNoise(&result->ks[i][j][h], mess, noise[index], alpha, out_key);
+                
                 index += 1;
             }
         }
@@ -171,15 +170,13 @@ void UserKeyGen::generateUserKeys()
 {
 /***************************************************************************** */
 // Open the file containing the parameters
-    std::ifstream bin_sealparam_handler("../data/System Parameters/sealparam.txt", std::ios::in | std::ios::binary);
+    std::ifstream bin_sealparam_handler("../data/System_Parameters/sealparam.txt", std::ios::in | std::ios::binary);
     if (!bin_sealparam_handler) {
-        //std::cerr << "Seal param file did not open!" << std::endl;
         throw std::runtime_error("Seal param file did not open!");
     }
 
     // Read the parameters from the file
     EncryptionParameters parms(scheme_type::bfv);
-    //bin_sealparam_handler.read(reinterpret_cast<char*>(&parms), sizeof(EncryptionParameters));
     parms.load(bin_sealparam_handler);
     bin_sealparam_handler.close();
 
@@ -187,7 +184,6 @@ void UserKeyGen::generateUserKeys()
         throw std::runtime_error("Seal param file did not close properly!");
     }
 SEALContext context(parms);
-//print_parameters(context);
 KeyGenerator init_keygen(context);
 
 clock_t start_usr_kgen1 = clock();
@@ -204,14 +200,12 @@ if (!is_valid_for(init_public_key,context)){
   bin_sealpubK_handler.open("../data/Traveller/sealpubK.txt", ios::out | ios::binary);
     ostream os(&bin_sealpubK_handler);
     init_public_key.save(os);
-  //bin_sealpubK_handler.write((char *) &init_public_key, sizeof(PublicKey));
   bin_sealpubK_handler.close();
 
   filebuf bin_sealpvtK_handler;
   bin_sealpvtK_handler.open("../data/Traveller/sealpvtK.txt", ios::out | ios::binary);
     ostream os2(&bin_sealpvtK_handler);
     init_seal_key.save(os2);
-  //bin_sealpubK_handler.write((char *) &init_public_key, sizeof(PublicKey));
   bin_sealpvtK_handler.close();
 
 if (parms.poly_modulus_degree() > 2048 )
@@ -222,7 +216,6 @@ if (parms.poly_modulus_degree() > 2048 )
   bin_sealrelinK_handler.open("../data/Traveller/sealrelinK.txt", ios::out | ios::binary);
     ostream os3(&bin_sealrelinK_handler);
     relin_keys.save(os3);
-  //bin_sealpubK_handler.write((char *) &init_public_key, sizeof(PublicKey));
   bin_sealrelinK_handler.close();
 
 }
@@ -233,18 +226,16 @@ clock_t end_usr_kgen1 = clock();
 */
 
 // Take in the tfhe params
-FILE * tgsw_iparams_file = fopen("../data/System Parameters/params_tgsw_in.txt" , "r");
-FILE * lwe_iparams_file = fopen("../data/System Parameters/params_lwe_in.txt" , "r");
-//FILE * tlwe_oparams_file = fopen("../data/System Parameters/params_tlwe_out.txt" , "r");
-FILE * tgsw_oparams_file = fopen("../data/System Parameters/params_tgsw_out.txt" , "r");
-FILE * lwe_oparams_file = fopen("../data/System Parameters/params_lwe_out.txt" , "r");
+FILE * tgsw_iparams_file = fopen("../data/System_Parameters/params_tgsw_in.txt" , "r");
+FILE * lwe_iparams_file = fopen("../data/System_Parameters/params_lwe_in.txt" , "r");
+FILE * tgsw_oparams_file = fopen("../data/System_Parameters/params_tgsw_out.txt" , "r");
+FILE * lwe_oparams_file = fopen("../data/System_Parameters/params_lwe_out.txt" , "r");
 
 
 TGswParams * init_tgsw_params = new_tGswParams_fromFile(tgsw_iparams_file);
 LweParams * init_lwe_params = new_lweParams_fromFile(lwe_iparams_file);
 TGswParams * out_tgsw_params = new_tGswParams_fromFile(tgsw_oparams_file);
 LweParams * out_lwe_params = new_lweParams_fromFile(lwe_oparams_file);
-//TLweParams * out_tlwe_params = new_tLweParams_fromFile(tlwe_oparams_file);
 
 clock_t start_usr_kgen2 = clock();
 TGswKey * init_tgsw_key = new_TGswKey(init_tgsw_params);
@@ -290,16 +281,9 @@ TLweKey * out1_tlwe_key = &(out1_tgsw_key->tlwe_key);
 LweKey * out1_lwe_key = new_LweKey(out_lwe_params);
 tLweExtractKey(out1_lwe_key, out1_tlwe_key);
 
-// TLweSample * ks_raw_inout = new_TLweSample_array(4096*switch_t, out_tlwe_params);
-// TLweKeySwitchKey * key_switch_inout = new TLweKeySwitchKey(init_lwe_params->n, switch_t, switch_base, out_tlwe_params, ks_raw_inout);
-// TLweKeySwitchKeyFunctions::CreateKeySwitchKey(key_switch_inout, init1_lwe_key, out1_tlwe_key);
-
-//cout << "Generating keyswitch key" << endl;
 clock_t start_usr_kgen3 = clock();
 LweKeySwitchKey * ks_inout_key = new_LweKeySwitchKey(4096, switch_t, switch_base, out_lwe_params);
-//cout << "Key switch key initiated" << endl;
 lweCreateKeySwitchKey(ks_inout_key, init1_lwe_key, out1_lwe_key);
-//cout << "Key switch key generated" << endl;
 clock_t end_usr_kgen3 = clock();
 FILE * ks_inout_key_file = fopen("../data/Traveller/KSKinout.data" , "w");
 export_lweKeySwitchKey_toFile(ks_inout_key_file, ks_inout_key);
@@ -307,8 +291,7 @@ fclose(ks_inout_key_file);
 
 
 // Bootstrapping key generation; Unique to each user.
-// const int switch_t = 8;
-// const int switch_base = 2;
+
 clock_t start_usr_kgen4 = clock();
 LweBootstrappingKey * boot_key = new_LweBootstrappingKey(switch_t , switch_base, init_lwe_params, out_tgsw_params);
 tfhe_createLweBootstrappingKey(boot_key, init1_lwe_key, out1_tgsw_key);

@@ -43,9 +43,9 @@ Project25Update/
 3. **Run the executables** from the `bin/` directory:
 
     ```bash
-    ./bin/HESysInit      # Generate system parameters and keys
-    ./bin/Register       # Register user biometrics
-    ./bin/Verify         # Verify biometrics
+    ./HESysInit      # Generate system parameters and keys
+    ./Register       # Register user biometrics
+    ./Verify         # Verify biometrics
     ```
 ## Dependencies
 

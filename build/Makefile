@@ -143,6 +143,19 @@ Register/fast:
 .PHONY : Register/fast
 
 #=============================================================================
+# Target rules for targets named EncBio
+
+# Build rule for target.
+EncBio: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 EncBio
+.PHONY : EncBio
+
+# fast build rule for target.
+EncBio/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/EncBio.dir/build.make CMakeFiles/EncBio.dir/build
+.PHONY : EncBio/fast
+
+#=============================================================================
 # Target rules for targets named Verify
 
 # Build rule for target.
@@ -154,6 +167,30 @@ Verify: cmake_check_build_system
 Verify/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Verify.dir/build.make CMakeFiles/Verify.dir/build
 .PHONY : Verify/fast
+
+src/Enc_Test_Bio.o: src/Enc_Test_Bio.cpp.o
+.PHONY : src/Enc_Test_Bio.o
+
+# target to build an object file
+src/Enc_Test_Bio.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/EncBio.dir/build.make CMakeFiles/EncBio.dir/src/Enc_Test_Bio.cpp.o
+.PHONY : src/Enc_Test_Bio.cpp.o
+
+src/Enc_Test_Bio.i: src/Enc_Test_Bio.cpp.i
+.PHONY : src/Enc_Test_Bio.i
+
+# target to preprocess a source file
+src/Enc_Test_Bio.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/EncBio.dir/build.make CMakeFiles/EncBio.dir/src/Enc_Test_Bio.cpp.i
+.PHONY : src/Enc_Test_Bio.cpp.i
+
+src/Enc_Test_Bio.s: src/Enc_Test_Bio.cpp.s
+.PHONY : src/Enc_Test_Bio.s
+
+# target to generate assembly for a file
+src/Enc_Test_Bio.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/EncBio.dir/build.make CMakeFiles/EncBio.dir/src/Enc_Test_Bio.cpp.s
+.PHONY : src/Enc_Test_Bio.cpp.s
 
 src/HESysInit.o: src/HESysInit.cpp.o
 .PHONY : src/HESysInit.o
@@ -233,6 +270,7 @@ src/dataIO.o: src/dataIO.cpp.o
 # target to build an object file
 src/dataIO.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Register.dir/build.make CMakeFiles/Register.dir/src/dataIO.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/EncBio.dir/build.make CMakeFiles/EncBio.dir/src/dataIO.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Verify.dir/build.make CMakeFiles/Verify.dir/src/dataIO.cpp.o
 .PHONY : src/dataIO.cpp.o
 
@@ -242,6 +280,7 @@ src/dataIO.i: src/dataIO.cpp.i
 # target to preprocess a source file
 src/dataIO.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Register.dir/build.make CMakeFiles/Register.dir/src/dataIO.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/EncBio.dir/build.make CMakeFiles/EncBio.dir/src/dataIO.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Verify.dir/build.make CMakeFiles/Verify.dir/src/dataIO.cpp.i
 .PHONY : src/dataIO.cpp.i
 
@@ -251,6 +290,7 @@ src/dataIO.s: src/dataIO.cpp.s
 # target to generate assembly for a file
 src/dataIO.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Register.dir/build.make CMakeFiles/Register.dir/src/dataIO.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/EncBio.dir/build.make CMakeFiles/EncBio.dir/src/dataIO.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Verify.dir/build.make CMakeFiles/Verify.dir/src/dataIO.cpp.s
 .PHONY : src/dataIO.cpp.s
 
@@ -259,6 +299,7 @@ src/keysEGate.o: src/keysEGate.cpp.o
 
 # target to build an object file
 src/keysEGate.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/HESysInit.dir/build.make CMakeFiles/HESysInit.dir/src/keysEGate.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Verify.dir/build.make CMakeFiles/Verify.dir/src/keysEGate.cpp.o
 .PHONY : src/keysEGate.cpp.o
 
@@ -267,6 +308,7 @@ src/keysEGate.i: src/keysEGate.cpp.i
 
 # target to preprocess a source file
 src/keysEGate.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/HESysInit.dir/build.make CMakeFiles/HESysInit.dir/src/keysEGate.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Verify.dir/build.make CMakeFiles/Verify.dir/src/keysEGate.cpp.i
 .PHONY : src/keysEGate.cpp.i
 
@@ -275,6 +317,7 @@ src/keysEGate.s: src/keysEGate.cpp.s
 
 # target to generate assembly for a file
 src/keysEGate.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/HESysInit.dir/build.make CMakeFiles/HESysInit.dir/src/keysEGate.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Verify.dir/build.make CMakeFiles/Verify.dir/src/keysEGate.cpp.s
 .PHONY : src/keysEGate.cpp.s
 
@@ -332,6 +375,7 @@ src/params.o: src/params.cpp.o
 # target to build an object file
 src/params.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/HESysInit.dir/build.make CMakeFiles/HESysInit.dir/src/params.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/EncBio.dir/build.make CMakeFiles/EncBio.dir/src/params.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Verify.dir/build.make CMakeFiles/Verify.dir/src/params.cpp.o
 .PHONY : src/params.cpp.o
 
@@ -341,6 +385,7 @@ src/params.i: src/params.cpp.i
 # target to preprocess a source file
 src/params.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/HESysInit.dir/build.make CMakeFiles/HESysInit.dir/src/params.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/EncBio.dir/build.make CMakeFiles/EncBio.dir/src/params.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Verify.dir/build.make CMakeFiles/Verify.dir/src/params.cpp.i
 .PHONY : src/params.cpp.i
 
@@ -350,6 +395,7 @@ src/params.s: src/params.cpp.s
 # target to generate assembly for a file
 src/params.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/HESysInit.dir/build.make CMakeFiles/HESysInit.dir/src/params.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/EncBio.dir/build.make CMakeFiles/EncBio.dir/src/params.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Verify.dir/build.make CMakeFiles/Verify.dir/src/params.cpp.s
 .PHONY : src/params.cpp.s
 
@@ -415,9 +461,13 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... EncBio"
 	@echo "... HESysInit"
 	@echo "... Register"
 	@echo "... Verify"
+	@echo "... src/Enc_Test_Bio.o"
+	@echo "... src/Enc_Test_Bio.i"
+	@echo "... src/Enc_Test_Bio.s"
 	@echo "... src/HESysInit.o"
 	@echo "... src/HESysInit.i"
 	@echo "... src/HESysInit.s"
