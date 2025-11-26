@@ -24,6 +24,7 @@ Project25Update/
 ├── src/                # Source code
 │   ├── HESysInit.cpp   # System parameter and key generation
 │   ├── Register.cpp    # Biometric registration
+|   ├── EncBio.cpp      # Enc of new test biometrics 
 │   ├── Verify.cpp      # Biometric verification
 │   └── ...             # Other source files
 ├── CMakeLists.txt      # Build configuration  (Change line 5 of this file to represent the project library at destination)
@@ -44,8 +45,9 @@ Project25Update/
 
     ```bash
     ./HESysInit      # Generate system parameters and keys
-    ./Register       # Register user biometrics
-    ./Verify         # Verify biometrics
+    ./Register <Reg_Biometrics_file>       # Register user biometrics
+    ./EncBio <Test_Biometrics_file>  # Encrypt new test biometrics
+    ./Verify <Threshold val> <Test_Bio_Enc_folder> <Registered_Bio_Enc_folder>        # Verify biometrics
     ```
 ## Dependencies
 
