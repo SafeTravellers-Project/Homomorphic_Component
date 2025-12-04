@@ -50,15 +50,16 @@ include_directories(${TFHE_NEW_INCLUDE_DIR})
 include_directories(${OPENSSL_INCLUDE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
+target_include_directories(HESysInit PRIVATE ../include)
 
 
-target_link_libraries(HESysInit SEAL::seal ${TFHE_LIBRARY_DIR}/libtfhe-spqlios-avx.so  ${TFHE_OPS_LIBRARY_DIR}/libmoretfheoperations.so ${TFHE_NEW_LIBRARY_DIR}/libnewtfhe.so ${OPENSSL_LIBRARIES}/libcrypto.a)
+target_link_libraries(HESysInit SEAL::seal ${TFHE_LIBRARY_DIR}/libtfhe-spqlios-avx.so  ${TFHE_OPS_LIBRARY_DIR}/libmoretfheoperations.so ${TFHE_NEW_LIBRARY_DIR}/libnewtfhe.so ${OPENSSL_LIBRARIES}/libcrypto.so)
 
-target_link_libraries(Register SEAL::seal ${TFHE_LIBRARY_DIR}/libtfhe-spqlios-avx.so ${TFHE_OPS_LIBRARY_DIR}/libmoretfheoperations.so ${TFHE_NEW_LIBRARY_DIR}/libnewtfhe.so ${OPENSSL_LIBRARIES}/libcrypto.a)
+target_link_libraries(Register SEAL::seal ${TFHE_LIBRARY_DIR}/libtfhe-spqlios-avx.so ${TFHE_OPS_LIBRARY_DIR}/libmoretfheoperations.so ${TFHE_NEW_LIBRARY_DIR}/libnewtfhe.so ${OPENSSL_LIBRARIES}/libcrypto.so)
 
-target_link_libraries(EncBio SEAL::seal ${TFHE_LIBRARY_DIR}/libtfhe-spqlios-avx.so ${TFHE_OPS_LIBRARY_DIR}/libmoretfheoperations.so ${TFHE_NEW_LIBRARY_DIR}/libnewtfhe.so ${OPENSSL_LIBRARIES}/libcrypto.a)
+target_link_libraries(EncBio SEAL::seal ${TFHE_LIBRARY_DIR}/libtfhe-spqlios-avx.so ${TFHE_OPS_LIBRARY_DIR}/libmoretfheoperations.so ${TFHE_NEW_LIBRARY_DIR}/libnewtfhe.so ${OPENSSL_LIBRARIES}/libcrypto.so)
 
-target_link_libraries(Verify SEAL::seal ${TFHE_LIBRARY_DIR}/libtfhe-spqlios-avx.so ${TFHE_OPS_LIBRARY_DIR}/libmoretfheoperations.so ${TFHE_NEW_LIBRARY_DIR}/libnewtfhe.so ${OPENSSL_LIBRARIES}/libcrypto.a)
+target_link_libraries(Verify SEAL::seal ${TFHE_LIBRARY_DIR}/libtfhe-spqlios-avx.so ${TFHE_OPS_LIBRARY_DIR}/libmoretfheoperations.so ${TFHE_NEW_LIBRARY_DIR}/libnewtfhe.so ${OPENSSL_LIBRARIES}/libcrypto.so)
 
  
 # Add the executable
