@@ -13,10 +13,10 @@ using namespace std;
 
 void HEKeyGen::generateHEkeys(){
 
-FILE * tgsw_oparams_file = fopen("../data/System Parameters/params_tgsw_out.txt" , "r");
+FILE * tgsw_oparams_file = fopen("../data/System_Parameters/params_tgsw_out.txt" , "r");
 TGswParams * out_tgsw_params = new_tGswParams_fromFile(tgsw_oparams_file);
 fclose(tgsw_oparams_file);
-FILE * lwe_oparams_file = fopen("../data/System Parameters/params_lwe_out.txt" , "r");
+FILE * lwe_oparams_file = fopen("../data/System_Parameters/params_lwe_out.txt" , "r");
 LweParams * out_lwe_params = new_lweParams_fromFile(lwe_oparams_file);
 fclose(lwe_oparams_file);
 

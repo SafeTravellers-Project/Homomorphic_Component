@@ -7,7 +7,7 @@
 
 #include <iostream>
 #include <cassert>
-#include "tfhe/tfhe.h"
+#include "tfhe.h"
 
 using namespace std;
 #define INCLUDE_ALL

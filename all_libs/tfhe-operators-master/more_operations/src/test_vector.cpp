@@ -8,7 +8,12 @@ void FTestVector::id(TorusPolynomial* testvect,
     const TLweParams* tlwe_params,
     int plaintext_size,
     int rescale)
-{FTestVector::id
+{
+  // Get parameters
+  const int N=tlwe_params->N;
+
+    // Get the size of the chunks
+   int chunk_size = N/plaintext_size;
   int temp_chunk_size;
 
   int plaintext_sizex2 = 2*plaintext_size;

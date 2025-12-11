@@ -12,7 +12,7 @@
 #include "lwekeyswitch.h"
 #include "lwe-functions.h"
 #include "lwebootstrappingkey.h"
-#include "tfhe/tfhe.h"
+#include "tfhe.h"
 
 using namespace std;
 #else

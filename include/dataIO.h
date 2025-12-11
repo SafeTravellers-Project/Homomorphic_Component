@@ -41,9 +41,8 @@ struct dataIO
   static void mulPlaintext(seal::Plaintext * plaintext1, seal::Plaintext * plaintext2,seal::Plaintext * destination, int size, uint32_t modulus);
   static void readPlaintext_arr(seal::Plaintext * plaintext, std::string path, uint32_t modulus);
 
-//  static void readVoxPlaintext_arr(seal::Plaintext  plaintext[], std::string path, int size, int precision, uint64_t modulus, int invert);
-  //static void readVoxPlaintext_arr1(seal::Plaintext * plaintext, std::string path, int size, int precision, uint64_t modulus, int invert);
-  //static void readVoxPlaintextSquare_arr(seal::Plaintext * plaintext, std::string path, int size, int precision, uint32_t modulus);
+  static void EncryptF2F(std::string path_to, std::string path_f, seal::Encryptor & encryptor, int vector_size, int precision, uint32_t modulus, int invert); // the invert parameter is to read the coefficients in the reverse order
 
+  static void Read_F(std::string path_to, seal::SEALContext &context,seal::Ciphertext &outCipher,seal::Ciphertext &outCipherSquare,seal::Ciphertext &outCosine);
 };
 

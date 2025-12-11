@@ -24,6 +24,7 @@ Project25Update/
 ├── src/                # Source code
 │   ├── HESysInit.cpp   # System parameter and key generation
 │   ├── Register.cpp    # Biometric registration
+|   ├── EncBio.cpp      # Enc of new test biometrics 
 │   ├── Verify.cpp      # Biometric verification
 │   └── ...             # Other source files
 ├── CMakeLists.txt      # Build configuration  (Change line 5 of this file to represent the project library at destination)
@@ -32,7 +33,16 @@ Project25Update/
 ## Build Instructions
 
 1. **Clone the repository** and ensure all required libraries (SEAL, TFHE, OpenSSL & TFHE_operations_masters) are present in `all_libs/`.
-2. **Build the project** using CMake(Version used 3.28.3):
+2. Some Pre-requisites for folder creation
+    ```bash
+    cd data
+    mkdir System_Parameters
+    cd CountryDB
+    mkdir Reg_Biometrics_Enc
+    cd ../E-Gate
+    mkdir Test_Biometrics_Enc
+    
+4. **Build the project** using CMake(Version used 3.28.3):
 
     ```bash
     cd build
@@ -40,12 +50,13 @@ Project25Update/
     make
     ```
 
-3. **Run the executables** from the `bin/` directory:
+5. **Run the executables** from the `bin/` directory:
 
     ```bash
-    ./bin/HESysInit      # Generate system parameters and keys
-    ./bin/Register       # Register user biometrics
-    ./bin/Verify         # Verify biometrics
+    ./HESysInit      # Generate system parameters and keys
+    ./Register <Reg_Biometrics_file>       # Register user biometrics
+    ./EncBio <Test_Biometrics_file>  # Encrypt new test biometrics
+    ./Verify <Threshold val> <Test_Bio_Enc_folder> <Registered_Bio_Enc_folder>        # Verify biometrics
     ```
 ## Dependencies
 
