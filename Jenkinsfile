@@ -41,14 +41,14 @@ pipeline {
                 withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "${DOCKER_REG_CREDS}", usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]){
                     script {
                         echo "*** Logging in to Docker registry: ${DOCKER_REG} ***"
-                        sh 'docker login ${DOCKER_REG} -u ${USERNAME} -p ${PASSWORD}'
+                        sh "docker login ${DOCKER_REG} -u ${USERNAME} -p ${PASSWORD}"
                         
                         echo "*** Pushing Docker image: ${env.FULL_IMAGE_NAME} ***"
-                        sh 'docker push ${env.FULL_IMAGE_NAME}'
+                        sh "docker push ${env.FULL_IMAGE_NAME}"
                         
                         // Push 'latest' tag if it was created
                         if (env.DOCKER_TAG != 'latest') {
-                            sh 'docker push ${DOCKER_REG}${DOCKER_REPO}${APP_NAME}:latest'
+                            sh "docker push ${DOCKER_REG}${DOCKER_REPO}${APP_NAME}:latest"
                         }
                     }
                 }
