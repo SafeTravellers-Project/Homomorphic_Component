@@ -8,7 +8,7 @@ pipeline {
         APP_NAME = "homomorphic-component"
         DOCKER_REG = "harbor.safetravellers.rid-intrasoft.eu"
         DOCKER_REPO = "/security/"
-        DOCKER_REG_CREDS = "harbor-creds"
+        HARBOR_CREDS = credentials('harbor-creds')
     }
     stages {
         stage('Build Docker Image') {
@@ -38,21 +38,18 @@ pipeline {
         
         stage('Login and Push Docker Image') {
             steps {
-                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "${DOCKER_REG_CREDS}", usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]){
-                    script {
-                        echo "*** Logging in to Docker registry: ${DOCKER_REG} ***"
-                        // Use withCredentials to avoid exposing password in logs
-                        sh """
-                            echo '${PASSWORD}' | docker login ${DOCKER_REG} -u '${USERNAME}' --password-stdin
-                        """
-                        
-                        echo "*** Pushing Docker image: ${env.FULL_IMAGE_NAME} ***"
-                        sh "docker push ${env.FULL_IMAGE_NAME}"
-                        
-                        // Push 'latest' tag if it was created
-                        if (env.DOCKER_TAG != 'latest') {
-                            sh "docker push ${DOCKER_REG}${DOCKER_REPO}${APP_NAME}:latest"
-                        }
+                script {
+                    echo "*** Logging in to Docker registry: ${DOCKER_REG} ***"
+                    sh """
+                        echo '${HARBOR_CREDS_PSW}' | docker login ${DOCKER_REG} -u '${HARBOR_CREDS_USR}' --password-stdin
+                    """
+                    
+                    echo "*** Pushing Docker image: ${env.FULL_IMAGE_NAME} ***"
+                    sh "docker push ${env.FULL_IMAGE_NAME}"
+                    
+                    // Push 'latest' tag if it was created
+                    if (env.DOCKER_TAG != 'latest') {
+                        sh "docker push ${DOCKER_REG}${DOCKER_REPO}${APP_NAME}:latest"
                     }
                 }
             }
