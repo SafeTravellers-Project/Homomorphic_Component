@@ -59,10 +59,10 @@ RUN mkdir -p /app/data/CountryDB/Reg_Biometrics_Enc
 RUN mkdir -p /app/data/E-Gate/Test_Biometrics_Enc
 # copying custom libraries
 RUN mkdir -p /app/libs
-COPY all_libs/tfhe-4096/build/libtfhe/libtfhe-spqlios-avx.so /app/libs/
-COPY all_libs/tfhe-operators-master/more_operations/build/lib/libmoretfheoperations.so /app/libs/
-COPY all_libs/tfhe-operators-master/new_tfhe/build/lib/libnewtfhe.so /app/libs/
-COPY all_libs/openssl-3.0.14/install/lib64/libcrypto.so /app/libs/
+COPY all_libs/nc/tfhe-4096/build/libtfhe/libtfhe-spqlios-avx.so /app/libs/
+COPY all_libs/nc/tfhe-operators-master/more_operations/build/lib/libmoretfheoperations.so /app/libs/
+COPY all_libs/nc/tfhe-operators-master/new_tfhe/build/lib/libnewtfhe.so /app/libs/
+COPY all_libs/nc/openssl-3.0.14/install/lib64/libcrypto.so /app/libs/
  
 ENV LD_LIBRARY_PATH="/app/libs:/usr/glibc-compat/lib:$LD_LIBRARY_PATH"
  
