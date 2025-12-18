@@ -54,9 +54,9 @@ WORKDIR /app
 COPY data /app/data
 COPY bin/ /app/bin/
  
-RUN mkdir -p app/data/System_Parameters
-RUN mkdir -p app/data/CountryDB/Reg_Biometrics_Enc
-RUN mkdir -p app/data/E-Gate/Test_Biometrics_Enc
+RUN mkdir -p /app/data/System_Parameters
+RUN mkdir -p /app/data/CountryDB/Reg_Biometrics_Enc
+RUN mkdir -p /app/data/E-Gate/Test_Biometrics_Enc
 # copying custom libraries
 RUN mkdir -p /app/libs
 COPY all_libs/tfhe-4096/build/libtfhe/libtfhe-spqlios-avx.so /app/libs/
