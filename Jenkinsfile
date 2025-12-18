@@ -11,29 +11,6 @@ pipeline {
         HARBOR_CREDS = credentials('harbor-creds')
     }
     stages {
-        stage('Checkout SCM and Git LFS Pull') {
-            steps {
-                script {
-                    echo "*** Checking out source code from SCM with Git LFS support ***"
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: scm.branches,
-                        extensions: [
-                            [$class: 'CheckoutOption', timeout: 10],
-                            [$class: 'CloneOption', 
-                             depth: 0, 
-                             noTags: false, 
-                             reference: '', 
-                             shallow: false,
-                             timeout: 10],
-                            [$class: 'GitLFSPull']
-                        ],
-                        userRemoteConfigs: scm.userRemoteConfigs
-                    ])
-                }
-            }
-        }
-        
         stage('Build Docker Image') {
             steps {
                 script {
