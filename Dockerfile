@@ -52,7 +52,7 @@ RUN mkdir -p /lib64 /etc/ld.so.conf.d && \
 WORKDIR /app
  
 COPY data /app/data
-COPY bin/ /app/bin/
+COPY nc/bin/ /app/bin/
  
 RUN mkdir -p /app/data/System_Parameters
 RUN mkdir -p /app/data/CountryDB/Reg_Biometrics_Enc
