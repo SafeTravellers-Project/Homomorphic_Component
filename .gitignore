@@ -1,0 +1,7 @@
+bin/
+build/
+all_libs/tfhe-operators-master/more_operations/build/*
+all_libs/tfhe-operators-master/more_operations/obj/*.o
+all_libs/tfhe-operators-master/new_tfhe/build/*
+all_libs/tfhe-operators-master/new_tfhe/obj/*.o
+data/*/*.data
