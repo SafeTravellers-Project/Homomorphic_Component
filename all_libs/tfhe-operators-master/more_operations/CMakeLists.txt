@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(tfhe_more_operations VERSION 1.0)
-set(PROJECT_DIR ~/Documents/CEA/Projects/SAFETravellers/Codes)
+set(PROJECT_DIR ${CMAKE_SOURCE_DIR}/../../..)
+set(LIBS_DIR ${PROJECT_DIR}/all_libs)
+
+
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -10,11 +13,13 @@ set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -std=c99")
 set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
 
 
-set(TFHE_INCLUDE_DIR ${PROJECT_DIR}/tfhe-4096/src/include)
-set(TFHE_LIBRARY_DIR ${PROJECT_DIR}/tfhe-4096/build/libtfhe)
+ set(TFHE_INCLUDE_DIR ${LIBS_DIR}/tfhe-4096/src/include)
+ set(TFHE_LIBRARY_DIR ${LIBS_DIR}/tfhe-4096/build/libtfhe)
 
-set(TFHE_SCALE_INCLUDE_DIR ${PROJECT_DIR}/tfhe-operators-master/new_tfhe/include)
-set(TFHE_SCALE_LIBRARY_DIR ${PROJECT_DIR}/tfhe-operators-master/new_tfhe/build/lib)
+
+
+set(TFHE_SCALE_INCLUDE_DIR ${LIBS_DIR}/tfhe-operators-master/new_tfhe/include)
+set(TFHE_SCALE_LIBRARY_DIR ${LIBS_DIR}/tfhe-operators-master/new_tfhe/build/lib)
 
 include_directories(${TFHE_INCLUDE_DIR})
 include_directories(${TFHE_SCALE_INCLUDE_DIR})

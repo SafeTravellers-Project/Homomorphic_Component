@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 # Set the project name and version
 project(SAFETravellers VERSION 2.0)
-set(PROJECT_DIR /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project25Update)
+set(PROJECT_DIR ${CMAKE_SOURCE_DIR})
 set(LIBS_DIR ${PROJECT_DIR}/all_libs)
 # Specify the C++ standard
 set(CMAKE_CXX_STANDARD 11)
