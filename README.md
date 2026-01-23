@@ -45,9 +45,18 @@ Project25Update/
 4. **Build the project** using CMake(Version used 3.28.3):
 
     ```bash
+    cd all_libs/tfhe-operations-master/new-tfhe/build
+    cmake ..
+    make -j4
+    cd ../..
+    cd more-operations/build
+    cmake ..
+    make -j4
+    cd ../../../../
+    
     cd build
     cmake ..
-    make
+    make -j4
     ```
 
 5. **Run the executables** from the `bin/` directory:
