@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 # Set the project name and version
 project(SAFETravellers VERSION 2.0)
-set(PROJECT_DIR /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project25Update)
+set(PROJECT_DIR ${CMAKE_SOURCE_DIR})
 set(LIBS_DIR ${PROJECT_DIR}/all_libs)
 # Specify the C++ standard
 set(CMAKE_CXX_STANDARD 11)
@@ -50,15 +50,16 @@ include_directories(${TFHE_NEW_INCLUDE_DIR})
 include_directories(${OPENSSL_INCLUDE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
+target_include_directories(HESysInit PRIVATE ../include)
 
 
-target_link_libraries(HESysInit SEAL::seal ${TFHE_LIBRARY_DIR}/libtfhe-spqlios-avx.so  ${TFHE_OPS_LIBRARY_DIR}/libmoretfheoperations.so ${TFHE_NEW_LIBRARY_DIR}/libnewtfhe.so ${OPENSSL_LIBRARIES}/libcrypto.a)
+target_link_libraries(HESysInit SEAL::seal ${TFHE_LIBRARY_DIR}/libtfhe-spqlios-avx.so  ${TFHE_OPS_LIBRARY_DIR}/libmoretfheoperations.so ${TFHE_NEW_LIBRARY_DIR}/libnewtfhe.so ${OPENSSL_LIBRARIES}/libcrypto.so)
 
-target_link_libraries(Register SEAL::seal ${TFHE_LIBRARY_DIR}/libtfhe-spqlios-avx.so ${TFHE_OPS_LIBRARY_DIR}/libmoretfheoperations.so ${TFHE_NEW_LIBRARY_DIR}/libnewtfhe.so ${OPENSSL_LIBRARIES}/libcrypto.a)
+target_link_libraries(Register SEAL::seal ${TFHE_LIBRARY_DIR}/libtfhe-spqlios-avx.so ${TFHE_OPS_LIBRARY_DIR}/libmoretfheoperations.so ${TFHE_NEW_LIBRARY_DIR}/libnewtfhe.so ${OPENSSL_LIBRARIES}/libcrypto.so)
 
-target_link_libraries(EncBio SEAL::seal ${TFHE_LIBRARY_DIR}/libtfhe-spqlios-avx.so ${TFHE_OPS_LIBRARY_DIR}/libmoretfheoperations.so ${TFHE_NEW_LIBRARY_DIR}/libnewtfhe.so ${OPENSSL_LIBRARIES}/libcrypto.a)
+target_link_libraries(EncBio SEAL::seal ${TFHE_LIBRARY_DIR}/libtfhe-spqlios-avx.so ${TFHE_OPS_LIBRARY_DIR}/libmoretfheoperations.so ${TFHE_NEW_LIBRARY_DIR}/libnewtfhe.so ${OPENSSL_LIBRARIES}/libcrypto.so)
 
-target_link_libraries(Verify SEAL::seal ${TFHE_LIBRARY_DIR}/libtfhe-spqlios-avx.so ${TFHE_OPS_LIBRARY_DIR}/libmoretfheoperations.so ${TFHE_NEW_LIBRARY_DIR}/libnewtfhe.so ${OPENSSL_LIBRARIES}/libcrypto.a)
+target_link_libraries(Verify SEAL::seal ${TFHE_LIBRARY_DIR}/libtfhe-spqlios-avx.so ${TFHE_OPS_LIBRARY_DIR}/libmoretfheoperations.so ${TFHE_NEW_LIBRARY_DIR}/libnewtfhe.so ${OPENSSL_LIBRARIES}/libcrypto.so)
 
  
 # Add the executable

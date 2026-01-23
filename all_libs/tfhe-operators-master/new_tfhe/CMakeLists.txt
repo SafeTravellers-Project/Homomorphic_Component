@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(tfhe_scaled_tfhe VERSION 1.0)
-set(PROJECT_DIR ~/Documents/CEA/Projects/SAFETravellers/Codes)
+#set(PROJECT_DIR ~/Documents/CEA/Projects/SAFETravellers/Codes/Project25Update/all_libs)
+set(PROJECT_DIR ${CMAKE_SOURCE_DIR}/../../)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)

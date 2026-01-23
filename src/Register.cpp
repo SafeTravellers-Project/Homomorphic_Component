@@ -153,6 +153,12 @@ const int vector_size = 1024;
   std::string fileName_model_to = "../data/CountryDB/Reg_Biometrics_Enc/";
   
   dataIO::EncryptF2F(fileName_model_to,fileName_model_f, init_encryptor, vector_size, precision, p,0);
+//   dataIO::EncryptF2F(fileName_model_to,fileName_model_f, init_encryptor, vector_size, precision, p,0);
+//     dataIO::EncryptF2F(fileName_model_to,fileName_model_f, init_encryptor, vector_size, precision, p,0);
+//     dataIO::EncryptF2F(fileName_model_to,fileName_model_f, init_encryptor, vector_size, precision, p,0);
+//     dataIO::EncryptF2F(fileName_model_to,fileName_model_f, init_encryptor, vector_size, precision, p,0);
+//     dataIO::EncryptF2F(fileName_model_to,fileName_model_f, init_encryptor, vector_size, precision, p,0);
+
 
 
 
