@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <sstream>
-
+#include <filesystem>
 // SEAL
 #include "seal/seal.h"
 #include "tfhe.h"
@@ -15,11 +15,12 @@
 
 using namespace std;
 using namespace seal;   
+namespace fs = std::filesystem;
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0]  << " <Raw Test Biometric file> " << std::endl;
+    if (argc < 3) {
+        std::cerr << "Usage: " << argv[0]  << " <Input Raw Test Biometric file>"  << " Output Encrypted Test Biometric folder> " << std::endl;
         return 1;
     }
     srand(time(0));
@@ -70,8 +71,41 @@ Evaluator evaluator(context);
 
 cout << "SEAL parameters and keys loaded successfully." << endl;
 
-std::string fileName_test_f = "../data/E-Gate/" + std::string(argv[1]);
-std::string fileName_test_to = "../data/E-Gate/Test_Biometrics_Enc/";
-dataIO::EncryptF2F(fileName_test_to,fileName_test_f, init_encryptor, vector_size, precision, p,1); 
-return 0;
+
+ std::string folderName_model_f = std::string(argv[1]);
+  std::string folderName_model_to = std::string(argv[2]);
+
+  // Check if input folder exists
+  if (!fs::exists(folderName_model_f)) {
+    std::cerr << "Error: Input folder does not exist: " << folderName_model_f << std::endl;
+    return 1;
+  }
+  
+  // Read all files from the input folder
+  std::vector<std::string> biometric_files;
+  for (const auto & entry : fs::directory_iterator(folderName_model_f)) {
+    if (fs::is_regular_file(entry)) {
+      biometric_files.push_back(entry.path().filename().string());
+    }
+  }
+  
+  if (biometric_files.empty()) {
+    std::cerr << "Error: No files found in input folder: " << folderName_model_f << std::endl;
+    return 1;
+  }
+  
+  // Display found files
+  cout << "Found " << biometric_files.size() << " biometric file(s) in " << folderName_model_f << ":" << endl;
+  for (const auto & file : biometric_files) {
+    cout << "  - " << file << endl;
+  }
+  cout << endl;
+
+for (const auto & fileName_model_f : biometric_files) {
+    cout << "Processing: " << fileName_model_f << endl;
+    std::string fileName_model_to = folderName_model_to + "/" + fileName_model_f + "_enc";
+    dataIO::EncryptF2F(fileName_model_to, fileName_model_f, init_encryptor, vector_size, precision, p, 0);
+    cout << "  ✓ Successfully encrypted " << endl;
+  }
+
 }
