@@ -105,50 +105,6 @@ Ciphertext testSEALCosineCipher;
 Ciphertext modelSEALCipher; 
 Ciphertext modelSEALCipherSquare; 
 Ciphertext modelSEALCosineCipher;
-
-
-
-/* Copy the keys that are going to be used again and again*/
-RelinKeys relin_key;
-filebuf bin_sealrelinK_handler;
-bin_sealrelinK_handler.open("../data/Traveller/sealrelinK.txt", ios::in | ios::binary);
-istream is_relin(&bin_sealrelinK_handler);
-relin_key.load(context,is_relin);
-bin_sealrelinK_handler.close();
-
-/* ********************Reading BootKey and KS keys *********************************************************** */
-
-FILE * boot_key_file = fopen("../data/Traveller/bootK.data" , "r"); 
-LweBootstrappingKey * boot_key = new_lweBootstrappingKey_fromFile(boot_key_file);
-LweBootstrappingKeyFFT * boot_key_fft = new_LweBootstrappingKeyFFT(boot_key);
-fclose(boot_key_file);
-//Key 1 -> Middle Key
-FILE * ks_med_key_file = fopen("../data/Traveller/KSKmed.data" , "r");
-LweKeySwitchKey * ks_med_key = new_lweKeySwitchKey_fromFile(ks_med_key_file);
-fclose(ks_med_key_file);
-// Middle Key -> HE Key
-FILE * ks_inout_key_file = fopen("../data/Traveller/KSKinout.data" , "r");
-LweKeySwitchKey * ks_inout_key = new_lweKeySwitchKey_fromFile(ks_inout_key_file);
-fclose(ks_inout_key_file);
-// HE Key -> E-Gate Key
- FILE * ks_key_file = fopen("../data/E-Gate/KSK.data", "r");
- LweKeySwitchKey * ks_key = new_lweKeySwitchKey_fromFile(ks_key_file);
- fclose(ks_key_file);
-
-/* Check if the lwekey exists in the E-Gate folder, if yes, copy it otherwise generate new keys  */ 
-  FILE * out2_lwekey_file = fopen("../data/E-Gate/lwe_out2.txt", "r");
-  // if (out2_lwekey_file == NULL) {
-  //   cout << "E-Gate not registered previously not found. Generating E-Gate keys..." << endl;
-  //   EGateKeyGen::generateEGatekeys();
-  //   FILE * out2_lwekey_file = fopen("../data/E-Gate/lwe_out2.txt", "r");
-  //   LweKey * out2_lwe_key = new_lweKey_fromFile(out2_lwekey_file);
-  //   fclose(out2_lwekey_file);
-  //   } else {
-    LweKey * out2_lwe_key = new_lweKey_fromFile(out2_lwekey_file);
-    fclose(out2_lwekey_file);
- //    }
-
-/* */
  
 std::string folderName_model_new = std::string(argv[1]);
 std::string folderName_model_old = std::string(argv[2]);
@@ -172,10 +128,10 @@ std::string folderName_model_old = std::string(argv[2]);
     return 1;
   }
 
- for (const auto & biofile : biometric_files) {
-    string fileName_model_new = folderName_model_new + "/" + biofile;
+
+ for (const auto & fileName_model_new : biometric_files) {
     dataIO::Read_F(fileName_model_new, context, testSEALCipher, testSEALCipherSquare, testSEALCosineCipher);
-    string fileName_model_old = folderName_model_old + "/" + biofile;
+    string fileName_model_old = folderName_model_old + "/" + fileName_model_new;
     dataIO::Read_F(fileName_model_old, context, modelSEALCipher, modelSEALCipherSquare, modelSEALCosineCipher);
 
 
@@ -196,7 +152,7 @@ Plaintext Threshold_value;
 dataIO::makePlaintext(&Threshold_value, threshold_val, N_seal, p);
 cout << "Threshold value taken in, set to  " << threshold_val << endl;
 
-
+RelinKeys relin_key;
 clock_t bin_start1=clock();
 
 /* Computing Euclidean distance */
@@ -204,6 +160,11 @@ clock_t bin_start1=clock();
 evaluator.multiply(modelSEALCipher,testSEALCipher,distanceVV);
 if (parms.poly_modulus_degree() > 2047) 
 {
+filebuf bin_sealrelinK_handler;
+bin_sealrelinK_handler.open("../data/Traveller/sealrelinK.txt", ios::in | ios::binary);
+istream is_relin(&bin_sealrelinK_handler);
+relin_key.load(context,is_relin);
+bin_sealrelinK_handler.close();
 evaluator.relinearize_inplace(distanceVV, relin_key);
 distanceVV4= distanceVV;
 }
@@ -264,7 +225,37 @@ clock_t bin_end2=clock();
 // std::cout << "The threshold-distance difference was  " << intTemp <<"  :: :: " << doubleTemp <<  '\n';
 // /**************************************************************** */
 
+/* ********************Reading BootKey and KS keys *********************************************************** */
 
+FILE * boot_key_file = fopen("../data/Traveller/bootK.data" , "r"); 
+LweBootstrappingKey * boot_key = new_lweBootstrappingKey_fromFile(boot_key_file);
+LweBootstrappingKeyFFT * boot_key_fft = new_LweBootstrappingKeyFFT(boot_key);
+fclose(boot_key_file);
+//Key 1 -> Middle Key
+FILE * ks_med_key_file = fopen("../data/Traveller/KSKmed.data" , "r");
+LweKeySwitchKey * ks_med_key = new_lweKeySwitchKey_fromFile(ks_med_key_file);
+fclose(ks_med_key_file);
+// Middle Key -> HE Key
+FILE * ks_inout_key_file = fopen("../data/Traveller/KSKinout.data" , "r");
+LweKeySwitchKey * ks_inout_key = new_lweKeySwitchKey_fromFile(ks_inout_key_file);
+fclose(ks_inout_key_file);
+// HE Key -> E-Gate Key
+ FILE * ks_key_file = fopen("../data/E-Gate/KSK.data", "r");
+ LweKeySwitchKey * ks_key = new_lweKeySwitchKey_fromFile(ks_key_file);
+ fclose(ks_key_file);
+
+/* Check if the lwekey exists in the E-Gate folder, if yes, copy it otherwise generate new keys  */ 
+  FILE * out2_lwekey_file = fopen("../data/E-Gate/lwe_out2.txt", "r");
+  // if (out2_lwekey_file == NULL) {
+  //   cout << "E-Gate not registered previously not found. Generating E-Gate keys..." << endl;
+  //   EGateKeyGen::generateEGatekeys();
+  //   FILE * out2_lwekey_file = fopen("../data/E-Gate/lwe_out2.txt", "r");
+  //   LweKey * out2_lwe_key = new_lweKey_fromFile(out2_lwekey_file);
+  //   fclose(out2_lwekey_file);
+  //   } else {
+    LweKey * out2_lwe_key = new_lweKey_fromFile(out2_lwekey_file);
+    fclose(out2_lwekey_file);
+ //    }
 
  LweSample * lweDeltaM = new_LweSample(out_lwe_params); // Defining the variable that will store the value of the sign bootstrapping.
  LweSample * lweRotation = new_LweSample(out_lwe_params); // Defining the variable that will store the value of the rotation insude bootstrapping.
@@ -332,13 +323,13 @@ int intTemp = modSwitchFromTorus32(torusTemp, p);
 double doubleTemp = ((double) intTemp - p*(intTemp >= p/2))/pow10[2*(precision-1)];
 
 cout << " **************************************************************" << endl;
-//cout << " Result given as - > Accept/Reject decision || Cosine Similarity Value " << endl;
-std::cout << folderName_model_new << ":" << fileName_model_new << "||" << flag << " || " << doubleTemp <<  '\n';
+cout << " Result given as - > Accept/Reject decision || Cosine Similarity Value " << endl;
+std::cout << flag << " || " << doubleTemp <<  '\n';
 cout << "***************************************************************************" << endl;
 cout << "Total time for accept/reject check : " << bin_duration << " seconds" << endl;
 
 std::cout << "Cosine computtion duration: " << cos_duration << " seconds" << std::endl;
- }
+
 
 
     return 0;
