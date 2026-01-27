@@ -85,7 +85,7 @@ namespace fs = std::filesystem;
 // }
 int main(int argc, char *argv[])
 {
-    if (argc < 3) {
+    if (argc < 2) {
     std::cerr << "Usage: " << argv[0] << " <Input Registration Biometric folder> " << " <Output Registration Biometric folder> "<<  std::endl;
     return 1;
   }

@@ -78,7 +78,7 @@ ls -lh ../bin/
 ┌─────────────────────────────────────────────────────────────────┐
 │                    BIOMETRIC REGISTRATION                        │
 │                                                                  │
-│  Step 2: ./Register <raw_biometric_file>                        │
+│  Step 2: ./Register " <Input Registration Biometric folder> "  " <Output Registration Biometric folder> "                      │
 │  └─> Encrypts and stores registered biometric template          │
 │      • Reads raw biometric (1024 float values)                  │
 │      • Encrypts using SEAL public key                           │
@@ -89,7 +89,7 @@ ls -lh ../bin/
 ┌─────────────────────────────────────────────────────────────────┐
 │                    TEST BIOMETRIC ENCRYPTION                     │
 │                                                                  │
-│  Step 3: ./EncBio <test_biometric_file>                         │
+│  Step 3: ./EncBio " <Input Raw Test Biometric file>"  " Output Encrypted Test Biometric folder>                         │
 │  └─> Encrypts test biometric for verification                   │
 │      • Reads test biometric (1024 float values)                 │
 │      • Encrypts using SEAL public key                           │
@@ -100,7 +100,7 @@ ls -lh ../bin/
 ┌─────────────────────────────────────────────────────────────────┐
 │                    HOMOMORPHIC VERIFICATION                      │
 │                                                                  │
-│  Step 4: ./Verify <threshold> <test_folder> <reg_folder>        │
+│  Step 4: ./Verify <threshold>  <Test Biometric folder> " " <Stored Biometric folder>
 │  └─> Compares encrypted biometrics homomorphically              │
 │      • Computes Euclidean distance (encrypted)                  │
 │      • Computes cosine similarity (encrypted)                   │
@@ -111,6 +111,10 @@ ls -lh ../bin/
 ```
 
 ---
+
+**All the folder paths to be provided must be given in Aboslute folder path.**
+
+
 
 ## Detailed Step-by-Step Guide
 
