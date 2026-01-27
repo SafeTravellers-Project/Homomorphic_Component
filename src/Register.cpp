@@ -152,7 +152,6 @@ const int vector_size = 1024;
   cout << "Reading the Biometrics, encrypting and registering" << endl;
   clock_t read_bio_start = clock();
   
-<<<<<<< HEAD
 
 //   std::string fileName_model_f = "../data/Traveller/" + std::string(argv[1]);
 //   std::string fileName_model_to = "../data/CountryDB/Reg_Biometrics_Enc/";
@@ -193,14 +192,6 @@ const int vector_size = 1024;
     dataIO::EncryptF2F(fileName_model_to, fileName_model_f, init_encryptor, vector_size, precision, p, 0);
     cout << "  ✓ Successfully encrypted and registered" << endl;
   }
-=======
-  dataIO::EncryptF2F(fileName_model_to,fileName_model_f, init_encryptor, vector_size, precision, p,0);
-//   dataIO::EncryptF2F(fileName_model_to,fileName_model_f, init_encryptor, vector_size, precision, p,0);
-//     dataIO::EncryptF2F(fileName_model_to,fileName_model_f, init_encryptor, vector_size, precision, p,0);
-//     dataIO::EncryptF2F(fileName_model_to,fileName_model_f, init_encryptor, vector_size, precision, p,0);
-//     dataIO::EncryptF2F(fileName_model_to,fileName_model_f, init_encryptor, vector_size, precision, p,0);
-//     dataIO::EncryptF2F(fileName_model_to,fileName_model_f, init_encryptor, vector_size, precision, p,0);
->>>>>>> 6706f48ad89d1dec5ced39c0a096c34c083a88a2
 
 
 
