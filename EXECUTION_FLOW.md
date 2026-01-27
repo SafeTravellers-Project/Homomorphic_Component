@@ -78,7 +78,11 @@ ls -lh ../bin/
 ┌─────────────────────────────────────────────────────────────────┐
 │                    BIOMETRIC REGISTRATION                        │
 │                                                                  │
+<<<<<<< HEAD
 │  Step 2: ./Register " <Input Registration Biometric folder> "  " <Output Registration Biometric folder> "                      │
+=======
+│  Step 2: ./Register <raw_biometric_file>                        │
+>>>>>>> 6706f48ad89d1dec5ced39c0a096c34c083a88a2
 │  └─> Encrypts and stores registered biometric template          │
 │      • Reads raw biometric (1024 float values)                  │
 │      • Encrypts using SEAL public key                           │
@@ -89,7 +93,11 @@ ls -lh ../bin/
 ┌─────────────────────────────────────────────────────────────────┐
 │                    TEST BIOMETRIC ENCRYPTION                     │
 │                                                                  │
+<<<<<<< HEAD
 │  Step 3: ./EncBio " <Input Raw Test Biometric file>"  " Output Encrypted Test Biometric folder>                         │
+=======
+│  Step 3: ./EncBio <test_biometric_file>                         │
+>>>>>>> 6706f48ad89d1dec5ced39c0a096c34c083a88a2
 │  └─> Encrypts test biometric for verification                   │
 │      • Reads test biometric (1024 float values)                 │
 │      • Encrypts using SEAL public key                           │
@@ -100,7 +108,11 @@ ls -lh ../bin/
 ┌─────────────────────────────────────────────────────────────────┐
 │                    HOMOMORPHIC VERIFICATION                      │
 │                                                                  │
+<<<<<<< HEAD
 │  Step 4: ./Verify <threshold>  <Test Biometric folder> " " <Stored Biometric folder>
+=======
+│  Step 4: ./Verify <threshold> <test_folder> <reg_folder>        │
+>>>>>>> 6706f48ad89d1dec5ced39c0a096c34c083a88a2
 │  └─> Compares encrypted biometrics homomorphically              │
 │      • Computes Euclidean distance (encrypted)                  │
 │      • Computes cosine similarity (encrypted)                   │
@@ -112,10 +124,13 @@ ls -lh ../bin/
 
 ---
 
+<<<<<<< HEAD
 **All the folder paths to be provided must be given in Aboslute folder path.**
 
 
 
+=======
+>>>>>>> 6706f48ad89d1dec5ced39c0a096c34c083a88a2
 ## Detailed Step-by-Step Guide
 
 ### Step 1: System Initialization

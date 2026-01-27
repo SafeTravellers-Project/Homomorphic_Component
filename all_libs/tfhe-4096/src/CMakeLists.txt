@@ -13,7 +13,7 @@ set(ENABLE_SPQLIOS_FMA ON CACHE BOOL "Enable the SPQLIOS FMA assembly FFT proces
 set(ENABLE_TESTS OFF CACHE BOOL "Build the tests (requires googletest)")
 
 project(tfhe)
-
+include_directories(../include)
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "AppleClang")
   # https://stackoverflow.com/a/16229679
   set(CLANG_FLAGS "-stdlib=libc++")
