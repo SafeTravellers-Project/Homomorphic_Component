@@ -35,6 +35,24 @@ pipeline {
                 }
             }
         }
+
+        stage('Build Docker Image of HE Preregister Keys') {
+            steps {
+                script {
+                    // Calculate Docker tag
+                    def dockerTag = 'latest-preregister-keys'
+                    env.DOCKER_TAG_PREREGISTER_KEYS = dockerTag
+                    env.FULL_IMAGE_NAME_PREREGISTER_KEYS = "${DOCKER_REG}${DOCKER_REPO}${APP_NAME}:${dockerTag}"
+                    
+                    echo "*** Building Docker image: ${env.FULL_IMAGE_NAME_PREREGISTER_KEYS} ***"
+                    
+                    // Build the Docker image
+                    sh """
+                        docker build -f Dockerfile.he_preregister_keys -t ${env.FULL_IMAGE_NAME_PREREGISTER_KEYS} .
+                    """
+                }
+            }
+        }
         
         stage('Login and Push Docker Image') {
             steps {
@@ -46,6 +64,9 @@ pipeline {
                     
                     echo "*** Pushing Docker image: ${env.FULL_IMAGE_NAME} ***"
                     sh "docker push ${env.FULL_IMAGE_NAME}"
+                    
+                    echo "*** Pushing Docker image: ${env.FULL_IMAGE_NAME_PREREGISTER_KEYS} ***"
+                    sh "docker push ${env.FULL_IMAGE_NAME_PREREGISTER_KEYS}"
                     
                     // Push 'latest' tag if it was created
                     if (env.DOCKER_TAG != 'latest') {
