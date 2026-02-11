@@ -70,5 +70,6 @@ WORKDIR /app/bin
 RUN chmod +x /app/bin/*
  
 RUN ./HESysInit
- 
+RUN ./Register ../data/E-Gate ../data/CountryDB/Reg_Biometrics_Enc
+
 CMD ["/bin/sh"]
