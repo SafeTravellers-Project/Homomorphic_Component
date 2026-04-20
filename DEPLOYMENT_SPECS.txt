@@ -1,0 +1,220 @@
+================================================================================
+  SAFETravellers HE Web Service -- Deployment & Resource Specification
+================================================================================
+
+This document describes the hardware, software, and infrastructure requirements
+for running the SAFETravellers Homomorphic Encryption web service as a Docker
+container.
+
+--------------------------------------------------------------------------------
+1. CPU
+--------------------------------------------------------------------------------
+
+  Architecture      : x86-64 ONLY
+                      Binaries are compiled for Intel/AMD x86-64.
+                      ARM-based servers (AWS Graviton, Azure Ampere, Apple
+                      Silicon, etc.) are NOT supported.
+
+  Instruction sets  : AVX2 minimum (mandatory)
+                      The TFHE library (libtfhe-spqlios-avx.so) uses AVX FFT
+                      routines. The service will crash on a CPU without AVX2.
+                      Most Intel CPUs from 2013+ and AMD CPUs from 2015+
+                      support AVX2.
+
+  vCPUs -- minimum  : 4
+  vCPUs -- recommended : 8
+                      Each API request spawns one long-running binary process.
+                      Multiple simultaneous users require multiple cores.
+                      TFHE bootstrapping with LWE dimension n=1024 and TGSW
+                      (N=4096, Bgbit=7, l=3) is computationally intensive.
+                      A single Verify call can take tens of seconds to a few
+                      minutes depending on the input.
+
+--------------------------------------------------------------------------------
+2. Memory (RAM)
+--------------------------------------------------------------------------------
+
+  Minimum           : 8 GB
+                      Covers the OS, API process, and 1 concurrent HE operation.
+
+  Recommended       : 16 GB
+                      Supports 2-4 concurrent operations without swapping.
+
+  Swap              : 4 GB recommended as a safety buffer.
+                      HE key material for TLWE N=4096 is large in memory.
+                      The data/Traveller/ key set alone is ~818 MB on disk and
+                      is loaded into RAM during Register and Verify operations.
+
+--------------------------------------------------------------------------------
+3. Storage (Disk)
+--------------------------------------------------------------------------------
+
+  Docker image                    : ~1.5 GB
+                                    (Ubuntu 24.04 base + Python packages +
+                                     pre-compiled binaries + baked-in FHE keys)
+
+  data/CountryDB/ (Docker volume) : ~1 MB per registered traveller
+                                    (3 encrypted files per biometric template)
+                                    Grows with every POST /api/v1/register call.
+
+  data/E-Gate/    (Docker volume) : ~260 MB per E-Gate session batch
+                                    Grows with POST /api/v1/encrypt-bio calls.
+                                    Old batches can be purged when no longer
+                                    needed.
+
+  tmp/            (Docker volume) : Allow ~500 MB headroom.
+                                    Used for ephemeral upload staging;
+                                    auto-cleaned after each request.
+
+  Recommended total disk          : 50 GB minimum
+                                    Sufficient for ~5,000 registered travellers,
+                                    logs, and OS overhead.
+
+  For larger deployments (e.g. a national border system), plan for:
+    - 1 MB x (number of registered travellers) for CountryDB
+    - Additional headroom for E-Gate session data and logs
+
+--------------------------------------------------------------------------------
+4. Network
+--------------------------------------------------------------------------------
+
+  Exposed port      : 8080 (HTTP, behind a TLS-terminating reverse proxy)
+
+  TLS termination   : Nginx is recommended (configuration file is provided in
+                      deploy/nginx/safetravellers-api.conf).
+                      A cloud load balancer with TLS offload also works.
+
+  Upload size limit : 50 MB per request (enforced in the nginx config).
+
+  Request timeout   : 30 MINUTES
+                      HE operations have a 1,800-second backend timeout.
+                      The reverse proxy timeout must be set to match this.
+                      (See proxy_read_timeout in the nginx config.)
+
+  API authentication: All endpoints (except GET /health) require the header:
+                        X-Api-Key: <secret-key>
+                      The secret key is set via the SAFE_API_KEY environment
+                      variable when starting the container.
+
+--------------------------------------------------------------------------------
+5. Software Prerequisites on the Host Machine
+--------------------------------------------------------------------------------
+
+  The partner only needs to install TWO things on the host:
+
+  1. Docker Engine  : Version 24.0 or newer
+                      Install on Ubuntu: sudo apt-get install docker.io
+                      Official guide: https://docs.docker.com/engine/install/
+
+  2. Docker Compose : v2 plugin (the "docker compose" command, not the legacy
+                      "docker-compose" binary)
+                      Install on Ubuntu: sudo apt-get install docker-compose-plugin
+
+  The following do NOT need to be installed manually -- they are all packaged
+  inside the Docker image:
+    - SEAL (Microsoft HE library)   -- statically linked into binaries
+    - TFHE library                  -- bundled .so inside the image
+    - OpenSSL / libcrypto           -- installed inside the image
+    - Python 3                      -- installed inside the image
+    - FastAPI, Uvicorn, Pydantic    -- installed inside the image
+
+--------------------------------------------------------------------------------
+6. Recommended Cloud VM / Instance Types
+--------------------------------------------------------------------------------
+
+  Cloud     Instance              vCPU   RAM    Notes
+  --------- --------------------- ------ ------ ------------------------------
+  AWS       c6i.xlarge (minimum)  4      8 GB   Intel Ice Lake, AVX2 OK
+  AWS       c6i.2xlarge (recommended) 8  16 GB  Intel Ice Lake, AVX2 OK
+  Azure     Standard_F4s_v2 (min) 4      8 GB   AVX2 OK
+  Azure     Standard_F8s_v2 (rec) 8      16 GB  AVX2 OK
+  GCP       c2-standard-4 (min)   4      16 GB  Intel Cascade Lake, AVX-512 OK
+  GCP       c2-standard-8 (rec)   8      32 GB  Intel Cascade Lake, AVX-512 OK
+  On-prem   Any x86-64 Intel/AMD  8      16 GB  Must have AVX2 support
+
+  IMPORTANT: Do NOT provision ARM-based instances (AWS Graviton, Azure Ampere,
+             Apple M-series). The binaries are x86-64 only and will not run.
+
+--------------------------------------------------------------------------------
+7. Quick-Start Steps for the Partner
+--------------------------------------------------------------------------------
+
+  Step 1 -- Install Docker (one-time, on the host machine)
+  ---------------------------------------------------------
+    sudo apt-get update
+    sudo apt-get install -y docker.io docker-compose-plugin
+    sudo usermod -aG docker $USER
+    # Log out and back in for group membership to take effect.
+
+  Step 2 -- Receive the project files
+  ------------------------------------
+    Unzip or clone the project to a local directory, e.g.:
+      /home/user/SAFETravellers/
+
+    The following paths must be present after extraction:
+      Dockerfile
+      docker-compose.yml
+      .dockerignore
+      bin/          (HESysInit, Register, EncBio, Verify)
+      api/          (server.py, requirements.txt)
+      all_libs/tfhe/build/libtfhe/libtfhe-spqlios-avx.so
+      data/System_Parameters/
+      data/HEComp/
+      data/Traveller/
+
+  Step 3 -- Set the API key
+  --------------------------
+    cd /home/user/SAFETravellers/
+    echo "SAFE_API_KEY=your-strong-secret-key-here" > .env
+
+    Keep this key confidential. All API callers must include it in the
+    X-Api-Key request header.
+
+  Step 4 -- Build and start the service
+  ---------------------------------------
+    docker compose up --build -d
+
+    The --build flag compiles the image on first run (takes 1-2 minutes).
+    On subsequent starts it is not needed:
+      docker compose up -d
+
+  Step 5 -- Verify the service is running
+  ----------------------------------------
+    curl http://localhost:8080/health
+    # Expected response: {"status":"ok","service":"SAFETravellers API"}
+
+  Step 6 -- (Optional) Set up Nginx for TLS
+  ------------------------------------------
+    The nginx configuration template is provided at:
+      deploy/nginx/safetravellers-api.conf
+
+    Fill in your domain name and SSL certificate paths, then follow the
+    standard Nginx site-enable procedure. This is only required if the
+    service is exposed directly on the internet.
+
+  Step 7 -- Common management commands
+  --------------------------------------
+    docker compose logs -f          # stream live logs
+    docker compose down             # stop the service
+    docker compose up -d            # start again (no rebuild)
+    docker compose restart          # restart without stopping volumes
+
+--------------------------------------------------------------------------------
+8. API Endpoints Summary
+--------------------------------------------------------------------------------
+
+  GET  /health                 No auth required. Returns service status.
+  POST /api/v1/init            Initialise / regenerate all FHE keys.
+  POST /api/v1/register        Register biometric templates (encrypt + store).
+  POST /api/v1/encrypt-bio     Encrypt test biometrics at the E-Gate.
+  POST /api/v1/verify          Compare encrypted biometrics and return result.
+
+  All POST endpoints require the header:
+    X-Api-Key: <your SAFE_API_KEY value>
+
+  Maximum request timeout: 30 minutes (1,800 seconds).
+  Maximum upload size:     50 MB per request.
+
+================================================================================
+  Contact the SAFETravellers development team for any questions.
+================================================================================

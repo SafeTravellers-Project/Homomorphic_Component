@@ -1,0 +1,3 @@
+# Hashes of file build rules.
+1b9874f8be0dd9880d4b5fa9a4aa9a99 thirdparty/zstd-build/CMakeFiles/clean-all
+00e5a0986514ff0102ed29120e805672 thirdparty/zstd-build/lib/CMakeFiles/uninstall

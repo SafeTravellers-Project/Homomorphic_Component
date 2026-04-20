@@ -1,0 +1,17 @@
+Generating User Keys...
+Files opened
+TGSW key generated
+Lwe key extracted
+Bridge to init KSK made
+Init to Out KSK made
+b_lwe_key n: 4096
+init_lwe_key n: 1024
+out_lwe_params n: 1024
+out_tgsw_params N: 1024
+out1_tgsw_key->params->l: 2
+out1_tgsw_key->params->Bgbit: 6
+Bootstrapping key generation started
+Parameters for bootstrapping key generation set
+TGsw TLWE key pointer: 0x5c47cb5b7a10
+Accum key set
+Generating bootstrapping key

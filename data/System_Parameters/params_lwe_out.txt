@@ -1,0 +1,5 @@
+-----BEGIN LWEPARAMS-----
+alpha_max: 0.00000003
+alpha_min: 0.00000003
+n:       1024
+-----END LWEPARAMS-----

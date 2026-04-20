@@ -1,0 +1,33 @@
+# ---------------------------------------------------------------------------
+# Exclude the large library source trees. Only the one .so file needed
+# by the C++ binaries is re-included via the negation rules below.
+# ---------------------------------------------------------------------------
+all_libs/
+!all_libs/tfhe/
+!all_libs/tfhe/build/
+!all_libs/tfhe/build/libtfhe/
+!all_libs/tfhe/build/libtfhe/libtfhe-spqlios-avx.so
+
+# C++ build artifacts (binaries are pre-built and copied from bin/)
+build/
+
+# C++ source and headers (not needed inside the container)
+src/
+include/
+
+# Deployment scripts (intended for bare-metal / VM installs)
+deploy/
+
+# Runtime biometric data — mounted as Docker volumes at run time
+data/CountryDB/
+data/E-Gate/
+
+# Temporary working directory
+tmp/
+
+# Version control
+.git/
+.gitignore
+
+# Documentation
+*.md

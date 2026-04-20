@@ -1,0 +1,6 @@
+-----BEGIN TLWEPARAMS-----
+N:       4096
+alpha_max: 0.00000003
+alpha_min: 0.00000003
+k:          1
+-----END TLWEPARAMS-----

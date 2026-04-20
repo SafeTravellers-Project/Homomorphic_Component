@@ -1,0 +1,48 @@
+# ---------------------------------------------------------------------------
+# docker-compose.yml — SAFETravellers API
+#
+# Production usage (pull image from Harbor registry):
+#   1. Set environment variables or create a .env file:
+#        HARBOR_REGISTRY=harbor.safetravellers.example.com
+#        HARBOR_PROJECT=safetravellers
+#        IMAGE_TAG=latest          # or a specific git SHA / semver tag
+#        SAFE_API_KEY=your-secret
+#   2. docker compose pull && docker compose up -d
+#
+# Local development usage (build from source):
+#   docker compose -f docker-compose.yml -f docker-compose.build.yml up --build -d
+#
+# Volumes:
+#   safetravellers-countrydb  — persistent registered biometrics
+#   safetravellers-egate      — persistent E-Gate test biometrics
+#   safetravellers-tmp        — ephemeral working files
+# ---------------------------------------------------------------------------
+
+services:
+  safetravellers-api:
+    image: "${HARBOR_REGISTRY:-harbor.safetravellers.example.com}/${HARBOR_PROJECT:-safetravellers}/safetravellers-api:${IMAGE_TAG:-latest}"
+    container_name: safetravellers-api
+    ports:
+      - "8080:8080"
+    environment:
+      - SAFE_API_HOST=0.0.0.0
+      - SAFE_API_PORT=8080
+      - SAFE_API_KEY=${SAFE_API_KEY:-change-this-api-key}
+    volumes:
+      - safetravellers-countrydb:/app/data/CountryDB
+      - safetravellers-egate:/app/data/E-Gate
+      - safetravellers-tmp:/app/tmp
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  safetravellers-countrydb:
+  safetravellers-egate:
+  safetravellers-tmp:
+
