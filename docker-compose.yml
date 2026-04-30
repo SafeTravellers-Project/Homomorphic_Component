@@ -22,6 +22,8 @@ services:
   safetravellers-api:
     image: "${HARBOR_REGISTRY:-harbor.safetravellers.example.com}/${HARBOR_PROJECT:-safetravellers}/safetravellers-api:${IMAGE_TAG:-latest}"
     container_name: safetravellers-api
+    labels:
+       - io.portainer.accesscontrol.teams=safetravellers-all
     ports:
       - "8080:8080"
     environment:
