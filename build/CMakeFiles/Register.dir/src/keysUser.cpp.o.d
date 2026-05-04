@@ -1,5 +1,5 @@
 CMakeFiles/Register.dir/src/keysUser.cpp.o: \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/src/keysUser.cpp \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/src/keysUser.cpp \
  /usr/include/stdc-predef.h \
  /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project25Update/all_libs/SEAL/native/src/seal/seal.h \
  /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project25Update/all_libs/SEAL/native/src/seal/batchencoder.h \
@@ -386,27 +386,27 @@ CMakeFiles/Register.dir/src/keysUser.cpp.o: \
  /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project25Update/all_libs/SEAL/native/src/seal/relinkeys.h \
  /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project25Update/all_libs/SEAL/native/src/seal/keygenerator.h \
  /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project25Update/all_libs/SEAL/native/src/seal/randomtostd.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/tfhe.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/tfhe_core.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/tfhe_generic_templates.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/numeric_functions.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/polynomials_arithmetic.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/polynomials.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/lagrangehalfc_arithmetic.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/lwe-functions.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/lwekey.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/lweparams.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/lwesamples.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/tlwe_functions.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/tlwe.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/tgsw_functions.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/tgsw.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/lwebootstrappingkey.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/lwekeyswitch.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/tfhe_gate_bootstrapping_functions.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/tfhe_gate_bootstrapping_structures.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/tfhe_io.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/include/utils.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/tfhe.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/tfhe_core.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/tfhe_generic_templates.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/numeric_functions.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/polynomials_arithmetic.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/polynomials.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/lagrangehalfc_arithmetic.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/lwe-functions.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/lwekey.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/lweparams.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/lwesamples.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/tlwe_functions.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/tlwe.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/tgsw_functions.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/tgsw.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/lwebootstrappingkey.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/lwekeyswitch.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/tfhe_gate_bootstrapping_functions.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/tfhe_gate_bootstrapping_structures.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/tfhe_io.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/include/utils.h \
  /usr/include/c++/13/iomanip /usr/include/c++/13/locale \
  /usr/include/c++/13/bits/locale_facets_nonio.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/time_members.h \
@@ -415,50 +415,50 @@ CMakeFiles/Register.dir/src/keysUser.cpp.o: \
  /usr/include/c++/13/bits/locale_facets_nonio.tcc \
  /usr/include/c++/13/bits/locale_conv.h \
  /usr/include/c++/13/bits/quoted_string.h /usr/include/c++/13/chrono \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/include/dataIO.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/include/dataIO.h \
  /usr/include/c++/13/experimental/filesystem \
  /usr/include/c++/13/experimental/bits/fs_fwd.h \
  /usr/include/c++/13/experimental/bits/fs_path.h \
  /usr/include/c++/13/codecvt \
  /usr/include/c++/13/experimental/bits/fs_dir.h \
  /usr/include/c++/13/experimental/bits/fs_ops.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/include/token.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/openssl-3.0.14/install/include/openssl/sha.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/openssl-3.0.14/install/include/openssl/macros.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/openssl-3.0.14/install/include/openssl/opensslconf.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/openssl-3.0.14/install/include/openssl/configuration.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/openssl-3.0.14/install/include/openssl/opensslv.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/openssl-3.0.14/install/include/openssl/e_os2.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/include/keysUser.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/include/token.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/openssl-3.0.14/install/include/openssl/sha.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/openssl-3.0.14/install/include/openssl/macros.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/openssl-3.0.14/install/include/openssl/opensslconf.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/openssl-3.0.14/install/include/openssl/configuration.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/openssl-3.0.14/install/include/openssl/opensslv.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/openssl-3.0.14/install/include/openssl/e_os2.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/include/keysUser.h \
  /usr/include/c++/13/fstream \
  /usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++io.h \
  /usr/include/c++/13/bits/fstream.tcc \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe-operators-master/new_tfhe/include/scaled_tfhe.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe-operators-master/new_tfhe/include/scaled_tlwe_functions.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/tfhe_gate_bootstrapping_functions.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/tfhe_gate_bootstrapping_structures.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/tfhe_core.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/tfhe_io.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/tfhe_generic_streams.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe-operators-master/new_tfhe/include/scaled_tlwe_keyswitch.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe-operators-master/new_tfhe/include/scaled_alloc.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe/src/include/tfhe_generic_templates.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe-operators-master/new_tfhe/include/scaled_tlwe_keyswitch_functions.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe-operators-master/new_tfhe/include/priv_keyswitch.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/new_tfhe/include/scaled_tfhe.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/new_tfhe/include/scaled_tlwe_functions.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/tfhe_gate_bootstrapping_functions.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/tfhe_gate_bootstrapping_structures.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/tfhe_core.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/tfhe_io.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/tfhe_generic_streams.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/new_tfhe/include/scaled_tlwe_keyswitch.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/new_tfhe/include/scaled_alloc.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include/tfhe_generic_templates.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/new_tfhe/include/scaled_tlwe_keyswitch_functions.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/new_tfhe/include/priv_keyswitch.h \
  /usr/include/assert.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe-operators-master/more_operations/include/more_tfhe.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe-operators-master/more_operations/include/fhe_argmax.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe-operators-master/more_operations/include/fhe_distance.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe-operators-master/more_operations/include/funxtensions.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe-operators-master/more_operations/include/operators.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe-operators-master/more_operations/include/extended-bootstrap.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/more_operations/include/more_tfhe.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/more_operations/include/fhe_argmax.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/more_operations/include/fhe_distance.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/more_operations/include/funxtensions.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/more_operations/include/operators.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/more_operations/include/extended-bootstrap.h \
  /usr/include/c++/13/math.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe-operators-master/more_operations/include/clear-utils.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe-operators-master/more_operations/include/scaled_operators.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe-operators-master/more_operations/include/scaled_boot.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe-operators-master/more_operations/include/test_vector.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe-operators-master/more_operations/include/scaled_private_operators.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe-operators-master/more_operations/include/private-bootstrap.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe-operators-master/more_operations/include/more_tfhe_io.h \
- /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/all_libs/tfhe-operators-master/more_operations/include/mux_ops.h
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/more_operations/include/clear-utils.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/more_operations/include/scaled_operators.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/more_operations/include/scaled_boot.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/more_operations/include/test_vector.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/more_operations/include/scaled_private_operators.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/more_operations/include/private-bootstrap.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/more_operations/include/more_tfhe_io.h \
+ /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/more_operations/include/mux_ops.h

@@ -1,4 +1,4 @@
-# Install script for directory: /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try
+# Install script for directory: /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update_1024try/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
