@@ -50,6 +50,9 @@ SESSION_FAILED    = "FAILED"
 # ---------------------------------------------------------------------------
 # Pydantic models
 # ---------------------------------------------------------------------------
+class FolderRequest(BaseModel):
+    input_folder: str
+    output_bucket: str
 
 class VerifyRequest(BaseModel):
     threshold: int
@@ -256,7 +259,8 @@ def _task_register(input_dir: Path, output_dir: Path, count: int) -> dict:
     try:
         result = _run_binary(["./Register", str(input_dir), str(output_dir)])
     finally:
-        shutil.rmtree(input_dir, ignore_errors=True)
+        if str(input_dir).startswith(str(TMP_DIR)):
+            shutil.rmtree(input_dir, ignore_errors=True)
     return {
         "ok": True,
         "uploaded_files": count,
@@ -270,7 +274,8 @@ def _task_encrypt_bio(input_dir: Path, output_dir: Path, count: int) -> dict:
     try:
         result = _run_binary(["./EncBio", str(input_dir), str(output_dir)])
     finally:
-        shutil.rmtree(input_dir, ignore_errors=True)
+        if str(input_dir).startswith(str(TMP_DIR)):
+            shutil.rmtree(input_dir, ignore_errors=True)
     return {
         "ok": True,
         "uploaded_files": count,
@@ -412,17 +417,21 @@ def init_system() -> SessionCreated:
     dependencies=[Depends(_check_api_key)],
 )
 def register_biometrics(
-    files: List[UploadFile] = File(...),
-    output_bucket: str = Form("default"),
+    # files: List[UploadFile] = File(...),
+    # output_bucket: str = Form("default"),
+    payload: FolderRequest
 ) -> SessionCreated:
-    bucket = _sanitize_segment(output_bucket)
+    bucket = _sanitize_segment(payload.output_bucket)
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
 
-    input_dir = Path(tempfile.mkdtemp(prefix="register_in_", dir=str(TMP_DIR)))
+    # input_dir = Path(tempfile.mkdtemp(prefix="register_in_", dir=str(TMP_DIR)))
+    input_dir = _resolve_project_path(payload.input_folder)
     output_dir = DATA_DIR / "CountryDB" / "Reg_Biometrics_Enc" / bucket / timestamp
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    count = _save_uploads(files, input_dir)
+    # count = _save_uploads(files, input_dir)
+    count = len(list(input_dir.iterdir()))
+
     session_id = _create_session("register")
     created_at = _sessions[session_id]["created_at"]
     _run_session_thread(session_id, _task_register, input_dir, output_dir, count)
@@ -435,17 +444,23 @@ def register_biometrics(
     dependencies=[Depends(_check_api_key)],
 )
 def encrypt_test_biometrics(
-    files: List[UploadFile] = File(...),
-    output_bucket: str = Form("default"),
+    # files: List[UploadFile] = File(...),
+    # output_bucket: str = Form("default"),
+    payload: FolderRequest
 ) -> SessionCreated:
-    bucket = _sanitize_segment(output_bucket)
+    bucket = _sanitize_segment(payload.output_bucket)
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
 
-    input_dir = Path(tempfile.mkdtemp(prefix="encbio_in_", dir=str(TMP_DIR)))
+    #input_dir = Path(tempfile.mkdtemp(prefix="encbio_in_", dir=str(TMP_DIR)))
+    input_dir = _resolve_project_path(payload.input_folder)
     output_dir = DATA_DIR / "E-Gate" / "Test_Bio_Enc" / bucket / timestamp
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    count = _save_uploads(files, input_dir)
+    if not input_dir.exists() or not input_dir.is_dir():
+        raise HTTPException(status_code=400, detail=f"Input folder not found: {input_dir}")
+
+    count = len(list(input_dir.iterdir()))
+
     session_id = _create_session("encrypt-bio")
     created_at = _sessions[session_id]["created_at"]
     _run_session_thread(session_id, _task_encrypt_bio, input_dir, output_dir, count)

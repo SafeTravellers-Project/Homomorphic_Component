@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe/src/include -I/home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/more_operations/include -I/home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/tfhe-operators-master/new_tfhe/include -I/home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/all_libs/openssl-3.0.14/install/include -I/home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4/include -isystem /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project25Update/all_libs/SEAL/native/src -isystem /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project25Update/all_libs/SEAL/build/native/src -isystem /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project25Update/all_libs/SEAL/build/thirdparty/msgsl-src/include
 
-CXX_FLAGS =  -march=x86-64 -mtune=generic -std=gnu++17
+CXX_FLAGS =  -march=x86-64-v3 -mtune=generic -std=gnu++17
 

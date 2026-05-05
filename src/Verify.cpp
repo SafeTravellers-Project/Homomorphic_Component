@@ -104,15 +104,11 @@ std::cout << "The size of Poly Modulus Degree has to be greater than that of the
   return -1;
 }
 
+
+
+
+
 /* Now going to read the ciphertexts of the Test Biometrics and then the Stored Biometrics  */
-
-Ciphertext testSEALCipher;
-Ciphertext testSEALCipherSquare;
-Ciphertext testSEALCosineCipher;
-Ciphertext modelSEALCipher; 
-Ciphertext modelSEALCipherSquare; 
-Ciphertext modelSEALCosineCipher;
-
 
 
 /* Copy the keys that are going to be used again and again*/
@@ -159,15 +155,55 @@ FILE * out2_lwekey_file = fopen("../data/E-Gate/lwe_out2.txt", "r");
  //    }
 
 /* */
+
+// Now I have to do this for every folder inside the Test_Enc_Bio folder and their correspomding name in the Registration_biometric folder.
+
+std::string folderName_model_new_root = std::string(argv[2]);
+std::string folderName_model_old_root = std::string(argv[3]); 
+
+if (!fs::exists(folderName_model_new_root)) {
+  std::cerr << "Error: Input Test folder does not exist: " << folderName_model_new_root << std::endl;
+  return 1;
+}
+if (!fs::exists(folderName_model_old_root)) {
+  std::cerr << "Error: Input Stored folder does not exist: " << folderName_model_old_root << std::endl;
+  return 1;
+}
+
+// Read biometric folders  //
+
+double total_bin_duration = 0.0;
+double total_cos_duration = 0.0;
+
+for (const auto &egate_entry : fs::directory_iterator(folderName_model_new_root)) {
+
+    if (!fs::is_directory(egate_entry)) continue;
+    std::string biometric_name = egate_entry.path().filename().string();
+    std::string egate_biometric_path = egate_entry.path().string() + "/";
+    std::string reg_biometric_path = folderName_model_old_root + biometric_name + "/";
+
+    // cout << "Processing biometric : " << biometric_name << endl;
+    // cout << "E-Gate biometric path : " << egate_biometric_path << endl;
+    // cout << "Registration biometric path : " << reg_biometric_path << endl;
+    // ------------------------------------
+    // CHECK MATCHING REGISTRATION FOLDER
+    // ------------------------------------
+    if (!fs::exists(reg_biometric_path) || !fs::is_directory(reg_biometric_path)) {
+        std::cerr << "Missing in registration subfolder: "
+                  << biometric_name << std::endl;
+        continue;
+    }
+
+// std::string folderName_model_new = std::string(argv[2]);
+// std::string folderName_model_old = std::string(argv[3]);
+
  
-std::string folderName_model_new = std::string(argv[2]);
-std::string folderName_model_old = std::string(argv[3]);
 
 // Check if input folder exists
-  if (!fs::exists(folderName_model_new)) {
-    std::cerr << "Error: Input folder does not exist: " << folderName_model_new << std::endl;
-    return 1;
-  }
+  // if (!fs::exists(folderName_model_new)) {
+  //   std::cerr << "Error: Input folder does not exist: " << folderName_model_new << std::endl;
+  //   return 1;
+  // }
   
   // Read all files from the input folder
   // std::vector<std::string> biometric_files;
@@ -182,11 +218,21 @@ std::string folderName_model_old = std::string(argv[3]);
   //   return 1;
   // }
 
+Ciphertext testSEALCipher;
+Ciphertext testSEALCipherSquare;
+Ciphertext testSEALCosineCipher;
+Ciphertext modelSEALCipher; 
+Ciphertext modelSEALCipherSquare; 
+Ciphertext modelSEALCosineCipher;
+
+
+
+
  //for (const auto & biofile : biometric_files) {
     //string fileName_model_new = folderName_model_new + "/" + biofile;
-    dataIO::Read_F(folderName_model_new, context, testSEALCipher, testSEALCipherSquare, testSEALCosineCipher);
+    dataIO::Read_F(egate_biometric_path, context, testSEALCipher, testSEALCipherSquare, testSEALCosineCipher);
     //string fileName_model_old = folderName_model_old + "/" + biofile;
-    dataIO::Read_F(folderName_model_old, context, modelSEALCipher, modelSEALCipherSquare, modelSEALCosineCipher);
+    dataIO::Read_F(reg_biometric_path, context, modelSEALCipher, modelSEALCipherSquare, modelSEALCosineCipher);
 
 
 /******************************************************* */
@@ -204,13 +250,13 @@ Plaintext Threshold_value;
 
 
 dataIO::makePlaintext(&Threshold_value, threshold_val, N_seal, p);
-cout << "Threshold value taken in, set to  " << threshold_val << endl;
+//cout << "Threshold value taken in, set to  " << threshold_val << endl;
 
 
 clock_t bin_start1=clock();
 
 /* Computing Euclidean distance */
-cout << "Computing Euclidean distance..." << endl;
+//cout << "Computing Euclidean distance..." << endl;
 evaluator.multiply(modelSEALCipher,testSEALCipher,distanceVV);
 if (parms.poly_modulus_degree() > 2047) 
 {
@@ -232,7 +278,7 @@ evaluator.add_plain_inplace(threshold_dist,Threshold_value); //this is threshold
 clock_t bin_end1=clock();
 
 clock_t cos_start2 = clock();
-cout << "Computing cosine distance..." << endl;
+//cout << "Computing cosine distance..." << endl;
 /* Computing the cosine */
 Ciphertext distanceCos;
 evaluator.multiply(modelSEALCosineCipher,testSEALCosineCipher,distanceCos);
@@ -300,14 +346,14 @@ clock_t bin_end2=clock();
 // delete_TLweSample(tlwe_t3);
 
 
-//  cout << "Here 292" << endl;
-// // FILE * b_lweKey_file = fopen("../data/Traveller/lwe_b.txt" , "r");
-// // LweKey * b_lwe_key = new_lweKey_fromFile(b_lweKey_file);
-// // fclose(b_lweKey_file);
+// //  cout << "Here 292" << endl;
+// // // FILE * b_lweKey_file = fopen("../data/Traveller/lwe_b.txt" , "r");
+// // // LweKey * b_lwe_key = new_lweKey_fromFile(b_lweKey_file);
+// // // fclose(b_lweKey_file);
 //  FILE * init_lweKey_file = fopen("../data/Traveller/lwe_in.txt" , "r");
 // LweKey * init_lwe_key = new_lweKey_fromFile(init_lweKey_file);
 // fclose(init_lweKey_file);
-// // // cout << "Here 296" << endl;
+// // // // cout << "Here 296" << endl;
 // static long int t_pow10[12] =
 //     {
 //         1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000
@@ -487,7 +533,7 @@ lweKeySwitch(lweDelta_boot_final,ks_key,lweDeltaM);
 //     printf("negative sign, reject\n");
 Torus32 torusTemp = lweSymDecrypt(lweDelta_boot_final, out2_lwe_key, torusDivision);
 int sign = decodeSignFromRaw(modSwitchFromTorus32(torusTemp, torusDivision));
-cout << "The sign of the distance difference is :  " << sign << endl;
+//cout << "The sign of the distance difference is :  " << sign << endl;
 string flag;
 if (sign > 0)
     //cout << "The distance is less than the threshold, same person (Accept). " << endl;
@@ -528,12 +574,39 @@ double doubleTemp = ((double) intTemp - p*(intTemp >= p/2))/pow10[2*(precision-1
 
 cout << " **************************************************************" << endl;
 //cout << " Result given as - > Accept/Reject decision || Cosine Similarity Value " << endl;
-std::cout << folderName_model_new <<  "||" << flag << " || " << doubleTemp <<  '\n';
-cout << "***************************************************************************" << endl;
-cout << "Total time for accept/reject check : " << bin_duration << " seconds" << endl;
+std::cout << egate_biometric_path <<  "||" << flag << " || " << doubleTemp <<  '\n';
+  
+total_bin_duration += bin_duration;
+total_cos_duration += cos_duration;
 
-std::cout << "Cosine computtion duration: " << cos_duration << " seconds" << std::endl;
- //}
+delete_LweSample(lwe_act);
+delete_LweSample(lweRotation);
+delete_LweSample(lweDeltaM);
+delete_LweSample(lweDelta_boot_final);
+delete_LweSample(lwe_act1);
+
+delete_LweSample(lwe_act_cos);
+delete_LweSample(lwe_act_cos_ks);
+delete_LweSample(lweCos_boot);
+delete_LweSample(lweCos_boot_final);
+delete_TLweSample(tlwe_act);
+delete_TLweSample(tlwe_act_cos);
+
+
+
+}
+
+
+cout << "***************************************************************************" << endl;
+
+
+
+
+cout << "Total time for accept/reject check : " << total_bin_duration << " seconds" << endl;
+
+std::cout << "Cosine computation duration: " << total_cos_duration << " seconds" << std::endl;
+
+//}
 // delete_LweSample(lwe_act);
 // delete_LweSample(lweRotation);
 // delete_LweSample(lweDeltaM);

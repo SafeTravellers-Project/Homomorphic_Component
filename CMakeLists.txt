@@ -69,6 +69,34 @@ target_link_libraries(Verify SEAL::seal ${TFHE_LIBRARY_DIR}/libtfhe-spqlios-avx.
  
 # Add the executable
 
+set(CMAKE_BUILD_RPATH
+    "$ORIGIN/../all_libs/tfhe/build/libtfhe"
+    "$ORIGIN/../all_libs/tfhe-operators-master/more_operations/build/lib"
+    "$ORIGIN/../all_libs/tfhe-operators-master/new_tfhe/build/lib"
+    "$ORIGIN/../all_libs/openssl-3.0.14/install/lib64"
+)
+
+set_target_properties(HESysInit
+PROPERTIES
+BUILD_RPATH "${CMAKE_BUILD_RPATH}"
+)
+
+set_target_properties(Register
+PROPERTIES
+BUILD_RPATH "${CMAKE_BUILD_RPATH}"
+)
+
+set_target_properties(EncBio
+PROPERTIES
+BUILD_RPATH "${CMAKE_BUILD_RPATH}"
+)
+
+set_target_properties(Verify
+PROPERTIES
+BUILD_RPATH "${CMAKE_BUILD_RPATH}"
+)
+
+
 set_target_properties(HESysInit
 PROPERTIES
 RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
