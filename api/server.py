@@ -110,6 +110,7 @@ def _folder_to_base64(output_dir: Path) -> List[dict]:
     Converts all files in a folder into base64 JSON payload.
     """
     results = []
+    expected = {"ciph", "cosineciph", "sqciph"}
 
     for bio_dir in output_dir.iterdir():
         if not bio_dir.is_dir():
@@ -117,19 +118,40 @@ def _folder_to_base64(output_dir: Path) -> List[dict]:
 
         files = []
 
+        seen = set()
+
         for file_path in bio_dir.iterdir():
             if not file_path.is_file():
                 continue
 
+            name = file_path.name
+
+            if name not in expected:
+                raise RuntimeError(
+                    f"Unexpected file '{name}' in {bio_dir}"
+                )
+
             files.append({
-                "name": file_path.name,
+                "name": name,
                 "content_base64": base64.b64encode(file_path.read_bytes()).decode()
             })
+
+            seen.add(name)
+
+        #  enforce completeness
+        if seen != expected:
+            raise RuntimeError(
+                f"Incomplete biometric '{bio_dir.name}', found {seen}"
+            )
 
         results.append({
             "bio_name": bio_dir.name,
             "files": files
         })
+
+    # Optional: ensure at least one biometric exists
+    if not results:
+        raise RuntimeError("No biometric output found")
 
     return results
 
