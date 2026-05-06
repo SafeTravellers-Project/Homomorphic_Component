@@ -277,19 +277,26 @@ ENDPOINT 6 — Create Register Session
 
   Form fields:
     files          (required, one or more)  Raw biometric template files.
-    output_bucket  (optional, default: "default")
-                   Traveller identifier / bucket label.
-                   Allowed: letters, digits, dots, hyphens, underscores.
 
   Response (200 OK — session created):
     <SessionCreated object>
 
   Result shape when COMPLETED:
+{
+  "ok": true,
+  "uploaded_files": 2,
+  "encrypted_biometrics": [
     {
-      "ok":                   true,
-      "uploaded_files":       #number of files in the folder,
-      "encrypted_output_dir": "/app/data/CountryDB/Reg_Biometrics_Enc/<bucket>/<timestamp>"
+      "bio_name": "template_a0",
+      "files": [
+        {"name": "ciph", "content_base64": "..."},
+        {"name": "cosineciph", "content_base64": "..."},
+        {"name": "sqciph", "content_base64": "..."}
+      ]
+      .....
     }
+  ]
+}
 
   Errors (immediate, before session is created):
     400 — {"detail": "No valid files uploaded"}
@@ -300,18 +307,17 @@ ENDPOINT 6 — Create Register Session
     curl -X POST https://platform.safetravellers.rid-intrasoft.eu/hews/api/v1/sessions/register \
       -H "X-Api-Key: your-long-random-secret" \
       -H "Content-Type: application/json" \
-      -d '{
-          "input_folder": "data/Traveller/Reg_Bio",
-          "output_bucket": "e2e_party_reg"
-          }'
+      -F "files=@template_a0.bin" \
+      -F "files=@template_b0.bin"
 
     # Step 2 — poll
     curl https://platform.safetravellers.rid-intrasoft.eu/hews/api/v1/sessions/<session_id> \
       -H "X-Api-Key: your-long-random-secret"
 
-    # Step 3 — get result (save encrypted_output_dir for later Verify call)
+    # Step 3 — get result (save the registered_biometrics in json for later Verify call)
     curl https://platform.safetravellers.rid-intrasoft.eu/hews/api/v1/sessions/<session_id>/result \
       -H "X-Api-Key: your-long-random-secret"
+      | jq '.result.encrypted_biometrics' > registered_biometrics.json
 
 --------------------------------------------------------------------------------
 ENDPOINT 7 — Create Encrypt-Bio Session  (E-Gate live scan)
@@ -328,36 +334,44 @@ ENDPOINT 7 — Create Encrypt-Bio Session  (E-Gate live scan)
 
   Form fields:
     files          (required, one or more)  Raw biometric files from E-Gate.
-    output_bucket  (optional, default: "default")
-                   E-Gate or session label. Same restrictions as /register.
+
 
   Response (200 OK — session created):
     <SessionCreated object>
 
   Result shape when COMPLETED:
+{
+  "ok": true,
+  "uploaded_files": 2,
+  "encrypted_biometrics": [
     {
-      "ok":                   true,
-      "uploaded_files":       #number of files in the folder,
-      "encrypted_output_dir": "/app/data/E-Gate/Test_Bio_Enc/<bucket>/<timestamp>"
+      "bio_name": "template_a0",
+      "files": [
+        {"name": "ciph", "content_base64": "..."},
+        {"name": "cosineciph", "content_base64": "..."},
+        {"name": "sqciph", "content_base64": "..."}
+      ]
+      .....
     }
+  ]
+}
 
   Example:
     # Step 1 — create session
     curl -X POST https://platform.safetravellers.rid-intrasoft.eu/hews/api/v1/sessions/encrypt-bio \
       -H "X-Api-Key: your-long-random-secret" \
       -H "Content-Type: application/json" \
-      -d '{
-          "input_folder": "data/E-Gate/Test_Bio",
-          "output_bucket": "e2e_party_test"
-          }'
+      -F "files=@template_a0.bin"
 
     # Step 2 — poll
     curl https://platform.safetravellers.rid-intrasoft.eu/hews/api/v1/sessions/<session_id> \
       -H "X-Api-Key: your-long-random-secret"
 
-    # Step 3 — get result (save encrypted_output_dir for Verify)
+    # Step 3 — get result (save the test_enc in a json for Verify)
     curl https://platform.safetravellers.rid-intrasoft.eu/hews/api/v1/sessions/<session_id>/result \
       -H "X-Api-Key: your-long-random-secret"
+      | jq '.result.encrypted_biometrics' > test_biometrics.json
+
 
 --------------------------------------------------------------------------------
 ENDPOINT 8 — Create Verify Session
@@ -375,23 +389,21 @@ ENDPOINT 8 — Create Verify Session
     operation — typical duration is several minutes to up to 30 minutes.
 
   Request body (JSON):
-    {
-      "threshold":               2000,
-      "test_encrypted_folder":   "<encrypted_output_dir from encrypt-bio result>",
-      "stored_encrypted_folder": "<encrypted_output_dir from register result>"
-    }
-
+{
+  "threshold": 2000,
+  "test_enc_set": List[Biometric]
+  "registered_enc_set": List[Biometric],
+  
+}
   Fields:
     threshold               (integer, required)
-                            HE comparison decision threshold. Typical value: 2000.
+                            HE comparison decision threshold. Typical value: 7000.
 
-    test_encrypted_folder   (string, required)
-                            Path returned by a previous encrypt-bio session result.
-                            Absolute or relative to /app/. Must stay inside /app/.
+    test_enc_set            (array of Biometrics, required)
+                            Encrypted biometric templates returned by /encrypt-bio session.
 
-    stored_encrypted_folder (string, required)
-                            Path returned by a previous register session result.
-                            Same path restrictions.
+    registered_enc_set      (array of Biometrics, required)
+                            Encrypted biometric templates returned by /register session.
 
   Response (200 OK — session created):
     <SessionCreated object>
@@ -418,11 +430,29 @@ ENDPOINT 8 — Create Verify Session
       -H "X-Api-Key: your-long-random-secret" \
       -d '{
         "threshold": 7000,
-        "test_encrypted_folder":
-          "/app/data/E-Gate/Test_Bio_Enc/gate_B1/20260420_110000/live_scan_enc",
-        "stored_encrypted_folder":
-          "/app/data/CountryDB/Reg_Biometrics_Enc/traveller_A42/20260420_100000/template1_enc"
+        "test_enc_set": <PASTE ENC-BIO RESULT encrypted_biometrics HERE>,
+        "registered_enc_set": <PASTE REGISTER RESULT encrypted_biometrics HERE>
       }'
+
+
+      or ### DO THE FOLLOWING PREFERABLY, IT IS EASIER ###
+
+    #Step 0
+    jq -n \
+        --slurpfile reg register_biometrics.json \
+        --slurpfile test test_biometrics.json \
+      '{
+        threshold: 7000,
+        registered_enc_set: $reg[0],
+        test_enc_set: $test[0]
+      }' \
+  > verify.json
+  
+    #Step 1
+    curl -X POST https://platform.safetravellers.rid-intrasoft.eu/hews/api/v1/sessions/verify \
+      -H "Content-Type: application/json" \
+      -H "X-Api-Key: your-long-random-secret" \
+      -d @verify.json
 
     # Step 2 — poll every 30 s
     curl https://platform.safetravellers.rid-intrasoft.eu/hews/api/v1/sessions/<session_id> \
