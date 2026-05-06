@@ -54,7 +54,7 @@ COPY api/server.py api/server.py
 COPY data/System_Parameters/ data/System_Parameters/
 COPY data/HEComp/             data/HEComp/
 COPY data/Traveller/          data/Traveller/
-
+COPY data/E-Gate/             data/E-Gate/
 # --------------------------------------------------------------------------
 # 5. Runtime data directories (populated by API calls at run time)
 #    These are intentionally empty; mount Docker volumes here to persist

@@ -250,15 +250,15 @@ ENDPOINT 5 — Create Init Session
 
   Example:
     # Step 1 — create session
-    curl -X POST http://localhost:8080/api/v1/sessions/init \
+    curl -X POST  https://platform.safetravellers.rid-intrasoft.eu/hews/api/v1/sessions/init \
       -H "X-Api-Key: your-long-random-secret"
 
     # Step 2 — poll (replace <session_id> with value from Step 1 response)
-    curl http://localhost:8080/api/v1/sessions/<session_id> \
+    curl  https://platform.safetravellers.rid-intrasoft.eu/hews/api/v1/sessions/<session_id> \
       -H "X-Api-Key: your-long-random-secret"
 
     # Step 3 — get result once COMPLETED
-    curl http://localhost:8080/api/v1/sessions/<session_id>/result \
+    curl https://platform.safetravellers.rid-intrasoft.eu/hews/api/v1/sessions/<session_id>/result \
       -H "X-Api-Key: your-long-random-secret"
 
 --------------------------------------------------------------------------------
@@ -287,10 +287,8 @@ ENDPOINT 6 — Create Register Session
   Result shape when COMPLETED:
     {
       "ok":                   true,
-      "uploaded_files":       2,
-      "encrypted_output_dir": "/app/data/CountryDB/Reg_Biometrics_Enc/<bucket>/<timestamp>",
-      "stdout":               "<Register output>",
-      "stderr":               ""
+      "uploaded_files":       #number of files in the folder,
+      "encrypted_output_dir": "/app/data/CountryDB/Reg_Biometrics_Enc/<bucket>/<timestamp>"
     }
 
   Errors (immediate, before session is created):
@@ -299,18 +297,20 @@ ENDPOINT 6 — Create Register Session
 
   Example:
     # Step 1 — create session
-    curl -X POST http://localhost:8080/api/v1/sessions/register \
+    curl -X POST https://platform.safetravellers.rid-intrasoft.eu/hews/api/v1/sessions/register \
       -H "X-Api-Key: your-long-random-secret" \
-      -F "output_bucket=traveller_A42" \
-      -F "files=@template1.bin" \
-      -F "files=@template2.bin"
+      -H "Content-Type: application/json" \
+      -d '{
+          "input_folder": "data/Traveller/Reg_Bio",
+          "output_bucket": "e2e_party_reg"
+          }'
 
     # Step 2 — poll
-    curl http://localhost:8080/api/v1/sessions/<session_id> \
+    curl https://platform.safetravellers.rid-intrasoft.eu/hews/api/v1/sessions/<session_id> \
       -H "X-Api-Key: your-long-random-secret"
 
     # Step 3 — get result (save encrypted_output_dir for later Verify call)
-    curl http://localhost:8080/api/v1/sessions/<session_id>/result \
+    curl https://platform.safetravellers.rid-intrasoft.eu/hews/api/v1/sessions/<session_id>/result \
       -H "X-Api-Key: your-long-random-secret"
 
 --------------------------------------------------------------------------------
@@ -337,25 +337,26 @@ ENDPOINT 7 — Create Encrypt-Bio Session  (E-Gate live scan)
   Result shape when COMPLETED:
     {
       "ok":                   true,
-      "uploaded_files":       1,
-      "encrypted_output_dir": "/app/data/E-Gate/Test_Bio_Enc/<bucket>/<timestamp>",
-      "stdout":               "<EncBio output>",
-      "stderr":               ""
+      "uploaded_files":       #number of files in the folder,
+      "encrypted_output_dir": "/app/data/E-Gate/Test_Bio_Enc/<bucket>/<timestamp>"
     }
 
   Example:
     # Step 1 — create session
-    curl -X POST http://localhost:8080/api/v1/sessions/encrypt-bio \
+    curl -X POST https://platform.safetravellers.rid-intrasoft.eu/hews/api/v1/sessions/encrypt-bio \
       -H "X-Api-Key: your-long-random-secret" \
-      -F "output_bucket=gate_B1" \
-      -F "files=@live_scan.bin"
+      -H "Content-Type: application/json" \
+      -d '{
+          "input_folder": "data/E-Gate/Test_Bio",
+          "output_bucket": "e2e_party_test"
+          }'
 
     # Step 2 — poll
-    curl http://localhost:8080/api/v1/sessions/<session_id> \
+    curl https://platform.safetravellers.rid-intrasoft.eu/hews/api/v1/sessions/<session_id> \
       -H "X-Api-Key: your-long-random-secret"
 
     # Step 3 — get result (save encrypted_output_dir for Verify)
-    curl http://localhost:8080/api/v1/sessions/<session_id>/result \
+    curl https://platform.safetravellers.rid-intrasoft.eu/hews/api/v1/sessions/<session_id>/result \
       -H "X-Api-Key: your-long-random-secret"
 
 --------------------------------------------------------------------------------
@@ -412,11 +413,11 @@ ENDPOINT 8 — Create Verify Session
 
   Example:
     # Step 1 — create session
-    curl -X POST http://localhost:8080/api/v1/sessions/verify \
+    curl -X POST https://platform.safetravellers.rid-intrasoft.eu/hews/api/v1/sessions/verify \
       -H "Content-Type: application/json" \
       -H "X-Api-Key: your-long-random-secret" \
       -d '{
-        "threshold": 2000,
+        "threshold": 7000,
         "test_encrypted_folder":
           "/app/data/E-Gate/Test_Bio_Enc/gate_B1/20260420_110000/live_scan_enc",
         "stored_encrypted_folder":
@@ -424,11 +425,11 @@ ENDPOINT 8 — Create Verify Session
       }'
 
     # Step 2 — poll every 30 s
-    curl http://localhost:8080/api/v1/sessions/<session_id> \
+    curl https://platform.safetravellers.rid-intrasoft.eu/hews/api/v1/sessions/<session_id> \
       -H "X-Api-Key: your-long-random-secret"
 
     # Step 3a — get result when COMPLETED
-    curl http://localhost:8080/api/v1/sessions/<session_id>/result \
+    curl https://platform.safetravellers.rid-intrasoft.eu/hews/api/v1/sessions/<session_id>/result \
       -H "X-Api-Key: your-long-random-secret"
 
     # Step 3b — handle FAILED (HTTP 422 is returned — raise condition)
@@ -501,510 +502,6 @@ NOTES FOR THIRD-PARTY DEVELOPERS
 7. Interactive documentation
    http://<host>:8080/docs    Swagger UI (try requests live)
    http://<host>:8080/redoc   ReDoc (printable)
-
-================================================================================
-  SAFETravellers development team
-================================================================================
-
-OVERVIEW
---------
-The SAFETravellers service exposes a RESTful HTTP API built with FastAPI
-(Python). All data is exchanged in JSON (application/json) except for
-biometric file uploads which use multipart/form-data.
-
-The API wraps four Homomorphic Encryption (HE) binaries:
-  HESysInit  — initialises FHE keys and system parameters
-  Register   — encrypts and stores biometric templates in the country DB
-  EncBio     — encrypts test biometrics at the E-Gate
-  Verify     — performs encrypted biometric comparison
-
-ASYNC JOB MODEL (important — read this first)
----------------------------------------------
-Because HE operations can take several minutes, ALL operation endpoints
-(init, register, encrypt-bio, verify) are ASYNCHRONOUS. When you call them,
-the server starts the job in the background and immediately returns a
-"job_id". You then poll GET /api/v1/jobs/{job_id} at any interval to check
-whether the job is still running, has completed, or has failed.
-
-This design is compatible with dashboard manager polling: the dashboard can
-call the operation endpoint, store the job_id, and then poll the job status
-endpoint every few seconds to update the UI — without holding a long
-HTTP connection open.
-
-  POST /api/v1/<operation>          → returns immediately with a job_id
-  GET  /api/v1/jobs/{job_id}        → returns current job status + result
-
-Job status values:
-  pending   — job accepted, not yet started
-  running   — HE binary is executing
-  done      — completed successfully; result is in the "result" field
-  failed    — binary returned an error; error message is in "error" field
-
-Base URL:
-  http://<host>:8080          (direct, without TLS)
-  https://<your-domain>       (recommended for production, via Nginx)
-
-Interactive API documentation (auto-generated by FastAPI):
-  http://<host>:8080/docs     Swagger UI — try endpoints directly in browser
-  http://<host>:8080/redoc    ReDoc — clean read-only reference
-
---------------------------------------------------------------------------------
-AUTHENTICATION
---------------------------------------------------------------------------------
-
-All endpoints except GET /health require an API key in the request header:
-
-  Header name : X-Api-Key
-  Value       : the secret configured in SAFE_API_KEY on the server
-
-Example:
-  X-Api-Key: your-long-random-secret
-
-If the key is missing or wrong, the server returns:
-  HTTP 401 Unauthorized
-  {"detail": "Invalid API key"}
-
---------------------------------------------------------------------------------
-COMMON RESPONSE CODES
---------------------------------------------------------------------------------
-
-  200 OK           — request accepted or job status returned successfully
-  202 Accepted     — (same as 200 for job submission — job has been queued)
-  400 Bad Request  — invalid input (missing files, bad folder name, etc.)
-  401 Unauthorized — missing or wrong API key
-  404 Not Found    — job_id does not exist
-  500 Internal Server Error — unexpected server error
-  504 Gateway Timeout — HE operation exceeded 1,800 seconds (job → "failed")
-
---------------------------------------------------------------------------------
-JOB OBJECT SCHEMA
---------------------------------------------------------------------------------
-
-All job status responses return this structure:
-
-  {
-    "job_id":     "3f2a1b4c-...",          string  — unique job identifier
-    "operation":  "verify",               string  — init | register | encrypt-bio | verify
-    "status":     "running",              string  — pending | running | done | failed
-    "created_at": "2026-04-17T10:00:00Z", string  — ISO 8601 UTC timestamp
-    "updated_at": "2026-04-17T10:02:14Z", string  — last state change timestamp
-    "result":     { ... } or null,        object  — populated when status = "done"
-    "error":      "..." or null           string  — populated when status = "failed"
-  }
-
---------------------------------------------------------------------------------
-ENDPOINT 1 — Health Check
---------------------------------------------------------------------------------
-
-  Method  : GET
-  Path    : /health
-  Auth    : NOT required
-
-  Description:
-    Returns the service status and the number of currently running jobs.
-    The SAFETravellers dashboard uses this endpoint for manager polling —
-    it calls it periodically (e.g. every 30 seconds) to confirm the service
-    is alive and to display how many HE operations are in progress.
-
-  Request body: none
-
-  Response (200 OK):
-    {
-      "status":      "ok",
-      "service":     "SAFETravellers API",
-      "active_jobs": 1
-    }
-
-  "active_jobs" is the count of jobs currently in "running" state.
-  A value of 0 means the service is idle.
-
-  Example:
-    curl http://localhost:8080/health
-
---------------------------------------------------------------------------------
-ENDPOINT 2 — Get Job Status  (polling endpoint)
---------------------------------------------------------------------------------
-
-  Method  : GET
-  Path    : /api/v1/jobs/{job_id}
-  Auth    : required (X-Api-Key header)
-
-  Description:
-    Returns the current status of a background job. Call this repeatedly
-    after submitting any operation to check for completion.
-
-    Recommended polling interval: every 10–30 seconds.
-    Stop polling when status is "done" or "failed".
-
-  Path parameter:
-    job_id  (string) — the UUID returned by the operation endpoint
-
-  Response (200 OK) — job still running:
-    {
-      "job_id":     "3f2a1b4c-0000-0000-0000-000000000000",
-      "operation":  "verify",
-      "status":     "running",
-      "created_at": "2026-04-17T10:00:00Z",
-      "updated_at": "2026-04-17T10:00:01Z",
-      "result":     null,
-      "error":      null
-    }
-
-  Response (200 OK) — job completed successfully:
-    {
-      "job_id":     "3f2a1b4c-0000-0000-0000-000000000000",
-      "operation":  "verify",
-      "status":     "done",
-      "created_at": "2026-04-17T10:00:00Z",
-      "updated_at": "2026-04-17T10:12:44Z",
-      "result":     { <operation-specific result object, see each endpoint> },
-      "error":      null
-    }
-
-  Response (200 OK) — job failed:
-    {
-      "job_id":     "3f2a1b4c-0000-0000-0000-000000000000",
-      "operation":  "verify",
-      "status":     "failed",
-      "created_at": "2026-04-17T10:00:00Z",
-      "updated_at": "2026-04-17T10:12:44Z",
-      "result":     null,
-      "error":      "Binary returned exit code 1: ..."
-    }
-
-  Error (404):
-    {"detail": "Job not found: 3f2a1b4c-..."}
-
-  Example:
-    curl http://localhost:8080/api/v1/jobs/3f2a1b4c-0000-0000-0000-000000000000 \
-      -H "X-Api-Key: your-long-random-secret"
-
---------------------------------------------------------------------------------
-ENDPOINT 3 — List All Jobs
---------------------------------------------------------------------------------
-
-  Method  : GET
-  Path    : /api/v1/jobs
-  Auth    : required (X-Api-Key header)
-
-  Description:
-    Returns all jobs submitted since the service last started.
-    Useful for the dashboard to display a history of operations.
-
-  Response (200 OK):
-    [ <array of job objects — same schema as Endpoint 2> ]
-
-  Example:
-    curl http://localhost:8080/api/v1/jobs \
-      -H "X-Api-Key: your-long-random-secret"
-
---------------------------------------------------------------------------------
-ENDPOINT 4 — Initialise FHE System
---------------------------------------------------------------------------------
-
-  Method  : POST
-  Path    : /api/v1/init
-  Auth    : required (X-Api-Key header)
-
-  Description:
-    Starts HESysInit in the background to generate or regenerate all FHE keys
-    and system parameters.
-
-    Call this endpoint:
-      - On first deployment if keys are not already baked into the image.
-      - To rotate all keys (note: existing encrypted data becomes unreadable
-        after a re-init — this is intentional for key rotation).
-
-    Typical duration: several minutes.
-
-  Request body: none
-
-  Response (200 OK) — job accepted:
-    {
-      "job_id":   "3f2a1b4c-0000-0000-0000-000000000000",
-      "status":   "pending",
-      "poll_url": "/api/v1/jobs/3f2a1b4c-0000-0000-0000-000000000000"
-    }
-
-  Result object when job reaches "done":
-    {
-      "ok":        true,
-      "command":   ["./HESysInit"],
-      "exit_code": 0,
-      "stdout":    "<HESysInit console output>",
-      "stderr":    ""
-    }
-
-  Example:
-    # Submit
-    curl -X POST http://localhost:8080/api/v1/init \
-      -H "X-Api-Key: your-long-random-secret"
-
-    # Poll (use job_id from above response)
-    curl http://localhost:8080/api/v1/jobs/<job_id> \
-      -H "X-Api-Key: your-long-random-secret"
-
---------------------------------------------------------------------------------
-ENDPOINT 5 — Register Biometrics
---------------------------------------------------------------------------------
-
-  Method       : POST
-  Path         : /api/v1/register
-  Auth         : required (X-Api-Key header)
-  Content-Type : multipart/form-data
-
-  Description:
-    Accepts one or more raw biometric template files, then asynchronously
-    encrypts and stores them in the country database under:
-      data/CountryDB/Reg_Biometrics_Enc/<output_bucket>/<timestamp>/
-
-    The "encrypted_output_dir" in the job result must be stored by the caller
-    — it is needed as "stored_encrypted_folder" in the Verify call.
-
-  Form fields:
-    files          (required, one or more file uploads)
-                   The raw biometric template files to register.
-                   Upload each file as a separate "files" field.
-
-    output_bucket  (optional, string, default: "default")
-                   A logical label for this registration batch, e.g. a
-                   traveller ID or passport number.
-                   Allowed characters: letters, digits, dots, hyphens,
-                   underscores. Special characters are sanitised automatically.
-
-  Response (200 OK) — job accepted:
-    {
-      "job_id":   "3f2a1b4c-0000-0000-0000-000000000000",
-      "status":   "pending",
-      "poll_url": "/api/v1/jobs/3f2a1b4c-0000-0000-0000-000000000000"
-    }
-
-  Result object when job reaches "done":
-    {
-      "ok":                   true,
-      "uploaded_files":       2,
-      "encrypted_output_dir": "/app/data/CountryDB/Reg_Biometrics_Enc/traveller_A42/20260417_100000",
-      "stdout":               "<Register console output>",
-      "stderr":               ""
-    }
-
-  Errors (returned immediately, before job is created):
-    400 — {"detail": "No valid files uploaded"}
-    400 — {"detail": "Invalid folder name"}
-
-  Example:
-    # Submit
-    curl -X POST http://localhost:8080/api/v1/register \
-      -H "X-Api-Key: your-long-random-secret" \
-      -F "output_bucket=traveller_A42" \
-      -F "files=@template1.bin" \
-      -F "files=@template2.bin"
-
-    # Poll
-    curl http://localhost:8080/api/v1/jobs/<job_id> \
-      -H "X-Api-Key: your-long-random-secret"
-
---------------------------------------------------------------------------------
-ENDPOINT 6 — Encrypt Test Biometrics (E-Gate)
---------------------------------------------------------------------------------
-
-  Method       : POST
-  Path         : /api/v1/encrypt-bio
-  Auth         : required (X-Api-Key header)
-  Content-Type : multipart/form-data
-
-  Description:
-    Accepts one or more raw biometric files captured at the E-Gate (live scan),
-    then asynchronously encrypts and stores them under:
-      data/E-Gate/Test_Bio_Enc/<output_bucket>/<timestamp>/
-
-    The "encrypted_output_dir" in the job result is needed as
-    "test_encrypted_folder" in the Verify call.
-
-  Form fields:
-    files          (required, one or more file uploads)
-                   The raw biometric files from the E-Gate scan.
-
-    output_bucket  (optional, string, default: "default")
-                   A logical label for this E-Gate session (e.g. gate ID,
-                   session ID). Same character restrictions as /register.
-
-  Response (200 OK) — job accepted:
-    {
-      "job_id":   "3f2a1b4c-0000-0000-0000-000000000000",
-      "status":   "pending",
-      "poll_url": "/api/v1/jobs/3f2a1b4c-0000-0000-0000-000000000000"
-    }
-
-  Result object when job reaches "done":
-    {
-      "ok":                   true,
-      "uploaded_files":       1,
-      "encrypted_output_dir": "/app/data/E-Gate/Test_Bio_Enc/gate_B1/20260417_110000",
-      "stdout":               "<EncBio console output>",
-      "stderr":               ""
-    }
-
-  Example:
-    # Submit
-    curl -X POST http://localhost:8080/api/v1/encrypt-bio \
-      -H "X-Api-Key: your-long-random-secret" \
-      -F "output_bucket=gate_B1" \
-      -F "files=@live_scan.bin"
-
-    # Poll
-    curl http://localhost:8080/api/v1/jobs/<job_id> \
-      -H "X-Api-Key: your-long-random-secret"
-
---------------------------------------------------------------------------------
-ENDPOINT 7 — Verify Identity
---------------------------------------------------------------------------------
-
-  Method       : POST
-  Path         : /api/v1/verify
-  Auth         : required (X-Api-Key header)
-  Content-Type : application/json
-
-  Description:
-    Starts an asynchronous HE comparison between a live encrypted biometric
-    (from /encrypt-bio) and a stored encrypted registration (from /register).
-    No raw biometric data is ever decrypted during this operation.
-
-    This is the most compute-intensive operation. Typical duration: several
-    minutes to up to 30 minutes. Poll the job status endpoint for the result.
-
-  Request body (JSON):
-    {
-      "threshold":               <integer>,
-      "test_encrypted_folder":   "<path from encrypt-bio result>",
-      "stored_encrypted_folder": "<path from register result>"
-    }
-
-  Fields:
-    threshold               (required, integer)
-                            Decision threshold for the HE comparison score.
-                            Typical value: 2000.
-
-    test_encrypted_folder   (required, string)
-                            Value of "encrypted_output_dir" from a previous
-                            /encrypt-bio job result.
-                            Can be absolute or relative to the project root.
-                            Must remain within /app/ inside the container.
-
-    stored_encrypted_folder (required, string)
-                            Value of "encrypted_output_dir" from a previous
-                            /register job result. Same path restrictions.
-
-  Response (200 OK) — job accepted:
-    {
-      "job_id":   "3f2a1b4c-0000-0000-0000-000000000000",
-      "status":   "pending",
-      "poll_url": "/api/v1/jobs/3f2a1b4c-0000-0000-0000-000000000000"
-    }
-
-  Result object when job reaches "done":
-    {
-      "ok":                 true,
-      "verify_result_line": "|| MATCH || score: 1842 || threshold: 2000 ||",
-      "stdout":             "<full Verify console output>",
-      "stderr":             ""
-    }
-
-    Parse "verify_result_line" to get the MATCH / NO MATCH decision and score.
-    If the line is an empty string, the binary produced no decision output.
-
-  Errors (returned immediately, before job is created):
-    400 — {"detail": "Test folder not found: /app/data/E-Gate/..."}
-    400 — {"detail": "Stored folder not found: /app/data/CountryDB/..."}
-    400 — {"detail": "Path must stay inside project root"}
-
-  Example:
-    # Submit
-    curl -X POST http://localhost:8080/api/v1/verify \
-      -H "Content-Type: application/json" \
-      -H "X-Api-Key: your-long-random-secret" \
-      -d '{
-        "threshold": 2000,
-        "test_encrypted_folder":
-          "/app/data/E-Gate/Test_Bio_Enc/gate_B1/20260417_110000/live_scan_enc",
-        "stored_encrypted_folder":
-          "/app/data/CountryDB/Reg_Biometrics_Enc/traveller_A42/20260417_100000/template1_enc"
-      }'
-
-    # Poll
-    curl http://localhost:8080/api/v1/jobs/<job_id> \
-      -H "X-Api-Key: your-long-random-secret"
-
---------------------------------------------------------------------------------
-TYPICAL INTEGRATION WORKFLOW
---------------------------------------------------------------------------------
-
-  ENROLMENT PHASE (done once per traveller, e.g. at passport issuance):
-  -----------------------------------------------------------------------
-  1.  Capture raw biometric templates from the traveller.
-  2.  POST /api/v1/register  (upload files, get job_id back immediately)
-  3.  Poll GET /api/v1/jobs/{job_id} every 10–30 s until status = "done".
-  4.  Read result.encrypted_output_dir and store it in your database,
-      linked to the traveller's identity (passport number, etc.).
-
-  BORDER CROSSING PHASE (done at each E-Gate passage):
-  -----------------------------------------------------------------------
-  5.  Capture a live biometric scan at the E-Gate.
-  6.  POST /api/v1/encrypt-bio  (upload scan, get job_id back immediately)
-  7.  Poll until status = "done". Note result.encrypted_output_dir.
-  8.  Look up the traveller's stored encrypted_output_dir from your database.
-  9.  POST /api/v1/verify  (send both paths + threshold, get job_id back)
-  10. Poll until status = "done".
-  11. Read result.verify_result_line for the MATCH / NO MATCH decision.
-  12. Act on the result (open gate, raise alert, etc.).
-
-  DASHBOARD MANAGER POLLING:
-  -----------------------------------------------------------------------
-  The dashboard can call GET /health every 30 seconds to confirm the service
-  is alive and read "active_jobs" for the real-time workload indicator.
-  It can also call GET /api/v1/jobs to show the full job history/log panel.
-
-  MAINTENANCE:
-  -----------------------------------------------------------------------
-  POST /api/v1/init — only if FHE keys need to be regenerated (rare).
-  Poll the returned job_id until "done" before using any other endpoint.
-
---------------------------------------------------------------------------------
-NOTES FOR THIRD-PARTY DEVELOPERS
---------------------------------------------------------------------------------
-
-1. Protocol
-   The API is REST over HTTP/1.1 (not WebSocket, gRPC, or SOAP).
-   Requests and responses use JSON except for file uploads (multipart/form-data).
-
-2. Job persistence
-   Jobs are stored in memory for the lifetime of the container process only.
-   They do NOT survive a container restart. Do not rely on job_ids across
-   restarts; always store the "encrypted_output_dir" paths in your own database.
-
-3. Persistent encrypted data
-   The "encrypted_output_dir" paths written inside the container ARE preserved
-   across container restarts because they live on Docker named volumes.
-   Only a call to /init (key regeneration) makes old encrypted data unreadable.
-
-4. Concurrency
-   Multiple jobs can run in parallel. Each consumes significant CPU and RAM.
-   Coordinate submission on your side to avoid saturating the server.
-
-5. No raw biometric data retained
-   Raw biometric files uploaded to /register and /encrypt-bio are deleted
-   from the server immediately after the background task reads them.
-   Only the encrypted output is kept.
-
-6. Key rotation
-   Calling /init regenerates all FHE keys. All previously encrypted data
-   in the Docker volumes becomes permanently unreadable. Only trigger this
-   when a full re-enrolment of all travellers is planned and acceptable.
-
-7. Interactive documentation
-   Once the service is running, open in a browser:
-     http://<host>:8080/docs     Swagger UI — submit real requests in browser
-     http://<host>:8080/redoc    ReDoc — clean printable reference
 
 ================================================================================
   SAFETravellers development team

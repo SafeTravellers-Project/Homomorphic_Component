@@ -265,8 +265,8 @@ def _task_register(input_dir: Path, output_dir: Path, count: int) -> dict:
         "ok": True,
         "uploaded_files": count,
         "encrypted_output_dir": str(output_dir),
-        "stdout": result.stdout,
-        "stderr": result.stderr,
+        #"stdout": result.stdout,
+        #"stderr": result.stderr,
     }
 
 
@@ -280,8 +280,8 @@ def _task_encrypt_bio(input_dir: Path, output_dir: Path, count: int) -> dict:
         "ok": True,
         "uploaded_files": count,
         "encrypted_output_dir": str(output_dir),
-        "stdout": result.stdout,
-        "stderr": result.stderr,
+        #"stdout": result.stdout,
+        #"stderr": result.stderr,
     }
 
 
@@ -296,7 +296,7 @@ def _task_verify(threshold: int, test_dir: Path, stored_dir: Path) -> dict:
     match_line = next((l for l in result.stdout.splitlines() if "||" in l), "")
     return {
         "ok": True,
-        "verify_result_line": match_line,
+        #"verify_result_line": match_line,
         "stdout": result.stdout,
         "stderr": result.stderr,
     }
@@ -426,7 +426,7 @@ def register_biometrics(
 
     # input_dir = Path(tempfile.mkdtemp(prefix="register_in_", dir=str(TMP_DIR)))
     input_dir = _resolve_project_path(payload.input_folder)
-    output_dir = DATA_DIR / "CountryDB" / "Reg_Biometrics_Enc" / bucket / timestamp
+    output_dir = DATA_DIR / "CountryDB" / "Reg_Biometrics_Enc" / bucket / timestamp 
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # count = _save_uploads(files, input_dir)
@@ -492,343 +492,5 @@ if __name__ == "__main__":
 
     uvicorn.run("server:app", host=HOST, port=PORT, reload=False)
 
-# ---------------------------------------------------------------------------
-# In-memory job store
-# Maps job_id (str) -> job record (dict).  Persists for the lifetime of the
-# container process only — sufficient for polling by the dashboard.
-# ---------------------------------------------------------------------------
-_jobs: Dict[str, dict] = {}
-_jobs_lock = threading.Lock()
 
-JOB_STATUS_PENDING = "pending"
-JOB_STATUS_RUNNING = "running"
-JOB_STATUS_DONE    = "done"
-JOB_STATUS_FAILED  = "failed"
 
-
-# ---------------------------------------------------------------------------
-# Pydantic models
-# ---------------------------------------------------------------------------
-
-class VerifyRequest(BaseModel):
-    threshold: int
-    test_encrypted_folder: str
-    stored_encrypted_folder: str
-
-
-class CommandResponse(BaseModel):
-    ok: bool
-    command: List[str]
-    exit_code: int
-    stdout: str
-    stderr: str
-
-
-class JobAccepted(BaseModel):
-    job_id: str
-    status: str
-    poll_url: str
-
-
-class JobStatus(BaseModel):
-    job_id: str
-    operation: str
-    status: str
-    created_at: str
-    updated_at: str
-    result: Optional[dict] = None
-    error: Optional[str] = None
-
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-def _sanitize_segment(segment: str) -> str:
-    cleaned = re.sub(r"[^a-zA-Z0-9._-]", "_", segment.strip())
-    cleaned = cleaned.strip("._")
-    if not cleaned:
-        raise HTTPException(status_code=400, detail="Invalid folder name")
-    return cleaned
-
-
-def _check_api_key(x_api_key: str = Header(default="")) -> None:
-    if not API_KEY or x_api_key != API_KEY:
-        raise HTTPException(status_code=401, detail="Invalid API key")
-
-
-def _run_binary(command: List[str]) -> CommandResponse:
-    process_env = os.environ.copy()
-    existing_ld_path = process_env.get("LD_LIBRARY_PATH", "")
-    process_env["LD_LIBRARY_PATH"] = (
-        f"{LOCAL_LIB_PATHS}:{existing_ld_path}" if existing_ld_path else LOCAL_LIB_PATHS
-    )
-
-    try:
-        result = subprocess.run(
-            command,
-            cwd=str(BIN_DIR),
-            text=True,
-            capture_output=True,
-            timeout=1800,
-            check=False,
-            env=process_env,
-        )
-    except subprocess.TimeoutExpired:
-        raise HTTPException(status_code=504, detail="Binary execution timed out")
-    except FileNotFoundError:
-        raise HTTPException(status_code=500, detail=f"Binary not found: {command[0]}")
-
-    response = CommandResponse(
-        ok=result.returncode == 0,
-        command=command,
-        exit_code=result.returncode,
-        stdout=result.stdout,
-        stderr=result.stderr,
-    )
-
-    if result.returncode != 0:
-        raise HTTPException(status_code=500, detail=response.model_dump())
-
-    return response
-
-
-def _save_uploads(files: List[UploadFile], destination: Path) -> int:
-    destination.mkdir(parents=True, exist_ok=True)
-    saved_count = 0
-    for file in files:
-        filename = Path(file.filename or "").name
-        if not filename:
-            continue
-        target = destination / filename
-        with target.open("wb") as out:
-            shutil.copyfileobj(file.file, out)
-        saved_count += 1
-    if saved_count == 0:
-        raise HTTPException(status_code=400, detail="No valid files uploaded")
-    return saved_count
-
-
-def _resolve_project_path(path_value: str) -> Path:
-    candidate = Path(path_value)
-    if candidate.is_absolute():
-        resolved = candidate.resolve()
-    else:
-        resolved = (PROJECT_ROOT / candidate).resolve()
-
-    try:
-        resolved.relative_to(PROJECT_ROOT)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Path must stay inside project root")
-
-    return resolved
-
-
-def _path_with_trailing_sep(path_obj: Path) -> str:
-    path_text = str(path_obj)
-    if path_text.endswith(os.sep):
-        return path_text
-    return path_text + os.sep
-
-
-def _now_iso() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
-def _create_job(operation: str) -> str:
-    job_id = str(uuid.uuid4())
-    with _jobs_lock:
-        _jobs[job_id] = {
-            "job_id": job_id,
-            "operation": operation,
-            "status": JOB_STATUS_PENDING,
-            "created_at": _now_iso(),
-            "updated_at": _now_iso(),
-            "result": None,
-            "error": None,
-        }
-    return job_id
-
-
-def _update_job(job_id: str, **kwargs: object) -> None:
-    with _jobs_lock:
-        if job_id in _jobs:
-            _jobs[job_id].update(kwargs)
-            _jobs[job_id]["updated_at"] = _now_iso()
-
-
-def _run_job_thread(job_id: str, fn, *args, **kwargs) -> None:
-    """Execute fn(*args, **kwargs) in a background thread, updating job state."""
-    def _worker():
-        _update_job(job_id, status=JOB_STATUS_RUNNING)
-        try:
-            result = fn(*args, **kwargs)
-            _update_job(job_id, status=JOB_STATUS_DONE, result=result)
-        except HTTPException as exc:
-            _update_job(job_id, status=JOB_STATUS_FAILED, error=str(exc.detail))
-        except Exception as exc:
-            _update_job(job_id, status=JOB_STATUS_FAILED, error=str(exc))
-
-    t = threading.Thread(target=_worker, daemon=True)
-    t.start()
-
-
-def _accepted_response(job_id: str) -> JobAccepted:
-    return JobAccepted(
-        job_id=job_id,
-        status=JOB_STATUS_PENDING,
-        poll_url=f"/api/v1/jobs/{job_id}",
-    )
-
-
-# ---------------------------------------------------------------------------
-# Background task implementations (called inside worker threads)
-# ---------------------------------------------------------------------------
-
-def _task_init() -> dict:
-    result = _run_binary(["./HESysInit"])
-    return result.model_dump()
-
-
-def _task_register(input_dir: Path, output_dir: Path, count: int) -> dict:
-    try:
-        cmd = ["./Register", str(input_dir), str(output_dir)]
-        result = _run_binary(cmd)
-    finally:
-        shutil.rmtree(input_dir, ignore_errors=True)
-    return {
-        "ok": True,
-        "uploaded_files": count,
-        "encrypted_output_dir": str(output_dir),
-        "stdout": result.stdout,
-        "stderr": result.stderr,
-    }
-
-
-def _task_encrypt_bio(input_dir: Path, output_dir: Path, count: int) -> dict:
-    try:
-        cmd = ["./EncBio", str(input_dir), str(output_dir)]
-        result = _run_binary(cmd)
-    finally:
-        shutil.rmtree(input_dir, ignore_errors=True)
-    return {
-        "ok": True,
-        "uploaded_files": count,
-        "encrypted_output_dir": str(output_dir),
-        "stdout": result.stdout,
-        "stderr": result.stderr,
-    }
-
-
-def _task_verify(threshold: int, test_dir: Path, stored_dir: Path) -> dict:
-    cmd = [
-        "./Verify",
-        str(threshold),
-        _path_with_trailing_sep(test_dir),
-        _path_with_trailing_sep(stored_dir),
-    ]
-    result = _run_binary(cmd)
-    match_line = ""
-    for line in result.stdout.splitlines():
-        if "||" in line:
-            match_line = line
-    return {
-        "ok": True,
-        "verify_result_line": match_line,
-        "stdout": result.stdout,
-        "stderr": result.stderr,
-    }
-
-
-# ---------------------------------------------------------------------------
-# Routes
-# ---------------------------------------------------------------------------
-
-@app.get("/health")
-def health() -> dict:
-    running = sum(1 for j in _jobs.values() if j["status"] == JOB_STATUS_RUNNING)
-    return {
-        "status": "ok",
-        "service": "SAFETravellers API",
-        "active_jobs": running,
-    }
-
-
-@app.get("/api/v1/jobs/{job_id}", response_model=JobStatus, dependencies=[Depends(_check_api_key)])
-def get_job(job_id: str) -> JobStatus:
-    with _jobs_lock:
-        job = _jobs.get(job_id)
-    if job is None:
-        raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
-    return JobStatus(**job)
-
-
-@app.get("/api/v1/jobs", response_model=List[JobStatus], dependencies=[Depends(_check_api_key)])
-def list_jobs() -> List[JobStatus]:
-    with _jobs_lock:
-        snapshot = list(_jobs.values())
-    return [JobStatus(**j) for j in snapshot]
-
-
-@app.post("/api/v1/init", response_model=JobAccepted, dependencies=[Depends(_check_api_key)])
-def init_system() -> JobAccepted:
-    job_id = _create_job("init")
-    _run_job_thread(job_id, _task_init)
-    return _accepted_response(job_id)
-
-
-@app.post("/api/v1/register", response_model=JobAccepted, dependencies=[Depends(_check_api_key)])
-def register_biometrics(
-    files: List[UploadFile] = File(...),
-    output_bucket: str = Form("default"),
-) -> JobAccepted:
-    bucket = _sanitize_segment(output_bucket)
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-
-    input_dir = Path(tempfile.mkdtemp(prefix="register_in_", dir=str(TMP_DIR)))
-    output_dir = DATA_DIR / "CountryDB" / "Reg_Biometrics_Enc" / bucket / timestamp
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    count = _save_uploads(files, input_dir)
-    job_id = _create_job("register")
-    _run_job_thread(job_id, _task_register, input_dir, output_dir, count)
-    return _accepted_response(job_id)
-
-
-@app.post("/api/v1/encrypt-bio", response_model=JobAccepted, dependencies=[Depends(_check_api_key)])
-def encrypt_test_biometrics(
-    files: List[UploadFile] = File(...),
-    output_bucket: str = Form("default"),
-) -> JobAccepted:
-    bucket = _sanitize_segment(output_bucket)
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-
-    input_dir = Path(tempfile.mkdtemp(prefix="encbio_in_", dir=str(TMP_DIR)))
-    output_dir = DATA_DIR / "E-Gate" / "Test_Bio_Enc" / bucket / timestamp
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    count = _save_uploads(files, input_dir)
-    job_id = _create_job("encrypt-bio")
-    _run_job_thread(job_id, _task_encrypt_bio, input_dir, output_dir, count)
-    return _accepted_response(job_id)
-
-
-@app.post("/api/v1/verify", response_model=JobAccepted, dependencies=[Depends(_check_api_key)])
-def verify_identity(payload: VerifyRequest) -> JobAccepted:
-    test_dir = _resolve_project_path(payload.test_encrypted_folder)
-    stored_dir = _resolve_project_path(payload.stored_encrypted_folder)
-
-    if not test_dir.exists() or not test_dir.is_dir():
-        raise HTTPException(status_code=400, detail=f"Test folder not found: {test_dir}")
-    if not stored_dir.exists() or not stored_dir.is_dir():
-        raise HTTPException(status_code=400, detail=f"Stored folder not found: {stored_dir}")
-
-    job_id = _create_job("verify")
-    _run_job_thread(job_id, _task_verify, payload.threshold, test_dir, stored_dir)
-    return _accepted_response(job_id)
-
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run("server:app", host=HOST, port=PORT, reload=False)
