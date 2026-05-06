@@ -20,7 +20,7 @@ deploy/
 
 # Runtime biometric data — mounted as Docker volumes at run time
 data/CountryDB/
-data/E-Gate/
+#data/E-Gate/
 
 # Temporary working directory
 tmp/

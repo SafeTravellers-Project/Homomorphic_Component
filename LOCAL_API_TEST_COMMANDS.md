@@ -24,7 +24,7 @@ Keep this terminal running.
 cd /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4
 python - <<'PY'
 import urllib.request
-print(urllib.request.urlopen("http://127.0.0.1:8080/health").read().decode())
+print(urllib.request.urlopen("http://127.0.0.1:8081/health").read().decode())
 PY
 ```
 
@@ -37,7 +37,7 @@ cd /home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26U
 python - <<'PY'
 import urllib.request
 req = urllib.request.Request(
-    "http://127.0.0.1:8080/api/v1/init",
+    "http://127.0.0.1:8081/api/v1/sessions/init",
     method="POST",
     headers={"x-api-key": "localtestkey"}
 )
@@ -55,7 +55,7 @@ python - <<'PY'
 import json, uuid, urllib.request
 from pathlib import Path
 
-BASE = "http://127.0.0.1:8080"
+BASE = "http://127.0.0.1:8081"
 KEY = "localtestkey"
 ROOT = Path("/home/olivechakraborty/Documents/CEA/Projects/SAFETravellers/Codes/Project26Update1024_v4")
 
@@ -92,14 +92,14 @@ def post_file(path, file_path, bucket):
     )
     return json.loads(urllib.request.urlopen(req, timeout=1800).read().decode())
 
-reg = post_file("/api/v1/register", ROOT / "data/Traveller/Reg_Bio/template_a0", "e2e_party_reg")
-enc = post_file("/api/v1/encrypt-bio", ROOT / "data/E-Gate/Test_Bio/template_b0", "e2e_party_test")
+reg = post_file("/api/v1/sessions/register", ROOT / "data/Traveller/Reg_Bio/template_a0", "e2e_party_reg")
+enc = post_file("/api/v1/sessions/encrypt-bio", ROOT / "data/E-Gate/Test_Bio/template_b0", "e2e_party_test")
 
 reg_dir = str(Path(reg["encrypted_output_dir"]) / "template_a0_enc")
 enc_dir = str(Path(enc["encrypted_output_dir"]) / "template_b0_enc")
 
-ver = post_json("/api/v1/verify", {
-    "threshold": 2000,
+ver = post_json("/api/v1/sessions/verify", {
+    "threshold": 7000,
     "test_encrypted_folder": enc_dir,
     "stored_encrypted_folder": reg_dir
 })

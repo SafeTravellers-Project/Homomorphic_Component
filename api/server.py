@@ -5,16 +5,16 @@ import subprocess
 import tempfile
 import threading
 import uuid
+import base64
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
 from pydantic import BaseModel
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 BIN_DIR = PROJECT_ROOT / "bin"
-DATA_DIR = PROJECT_ROOT / "data"
 TMP_DIR = PROJECT_ROOT / "tmp"
 LOCAL_LIB_PATHS = ":".join(
     [
@@ -50,14 +50,19 @@ SESSION_FAILED    = "FAILED"
 # ---------------------------------------------------------------------------
 # Pydantic models
 # ---------------------------------------------------------------------------
-class FolderRequest(BaseModel):
-    input_folder: str
-    output_bucket: str
+
+class CryptoFile(BaseModel):
+    name: str # e.g., "ciph", "cosineciph", "sqciph"
+    content_base64: str
+
+class Biometric(BaseModel):
+    bio_name: str
+    files: List[CryptoFile]
 
 class VerifyRequest(BaseModel):
     threshold: int
-    test_encrypted_folder: str
-    stored_encrypted_folder: str
+    registered_enc_set: List[Biometric]
+    test_enc_set: List[Biometric]
 
 
 class CommandResponse(BaseModel):
@@ -99,12 +104,58 @@ class SessionResult(BaseModel):
 # Internal helpers
 # ---------------------------------------------------------------------------
 
-def _sanitize_segment(segment: str) -> str:
-    cleaned = re.sub(r"[^a-zA-Z0-9._-]", "_", segment.strip())
-    cleaned = cleaned.strip("._")
-    if not cleaned:
-        raise HTTPException(status_code=400, detail="Invalid folder name")
-    return cleaned
+
+def _folder_to_base64(output_dir: Path) -> List[dict]:
+    """
+    Converts all files in a folder into base64 JSON payload.
+    """
+    results = []
+
+    for bio_dir in output_dir.iterdir():
+        if not bio_dir.is_dir():
+            continue
+
+        files = []
+
+        for file_path in bio_dir.iterdir():
+            if not file_path.is_file():
+                continue
+
+            files.append({
+                "name": file_path.name,
+                "content_base64": base64.b64encode(file_path.read_bytes()).decode()
+            })
+
+        results.append({
+            "bio_name": bio_dir.name,
+            "files": files
+        })
+
+    return results
+
+def _write_biometrics(encs: List[Biometric], root: Path) -> None:
+    for bio in encs:
+        bio_dir = root / bio.bio_name
+        bio_dir.mkdir(parents=True, exist_ok=True)
+
+        seen = set()
+
+        for f in bio.files:
+            if f.name not in {"ciph", "cosineciph", "sqciph"}:
+                raise HTTPException(400, f"Invalid file: {f.name}")
+
+            data = base64.b64decode(f.content_base64)
+            (bio_dir / f.name).write_bytes(data)
+
+            seen.add(f.name)
+
+        if seen != {"ciph", "cosineciph", "sqciph"}:
+            raise HTTPException(
+                400,
+                f"Incomplete biometric {bio.bio_name}"
+            )
+
+
 
 
 def _check_api_key(x_api_key: str = Header(default="")) -> None:
@@ -163,20 +214,32 @@ def _save_uploads(files: List[UploadFile], destination: Path) -> int:
         raise HTTPException(status_code=400, detail="No valid files uploaded")
     return saved_count
 
+def _save_uploads_grouped(files: List[UploadFile], destination: Path) -> int:
+    destination.mkdir(parents=True, exist_ok=True)
+    count = 0
 
-def _resolve_project_path(path_value: str) -> Path:
-    candidate = Path(path_value)
-    if candidate.is_absolute():
-        resolved = candidate.resolve()
-    else:
-        resolved = (PROJECT_ROOT / candidate).resolve()
+    for file in files:
+        filename = Path(file.filename or "").name
+        if not filename:
+            continue
 
-    try:
-        resolved.relative_to(PROJECT_ROOT)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Path must stay inside project root")
+        bio_name = Path(filename).stem  # face.bin → face
 
-    return resolved
+        bio_dir = destination / bio_name
+        bio_dir.mkdir(parents=True, exist_ok=True)
+
+        target = bio_dir / filename
+
+        with target.open("wb") as out:
+            shutil.copyfileobj(file.file, out)
+
+        count += 1
+
+    if count == 0:
+        raise HTTPException(status_code=400, detail="No valid files uploaded")
+
+    return count
+
 
 
 def _path_with_trailing_sep(path_obj: Path) -> str:
@@ -255,52 +318,76 @@ def _task_init() -> dict:
     return result.model_dump()
 
 
-def _task_register(input_dir: Path, output_dir: Path, count: int) -> dict:
+def _task_register(input_dir: Path, count: int) -> dict:
+    output_dir = Path(tempfile.mkdtemp(prefix="register_out_", dir=str(TMP_DIR)))
     try:
         result = _run_binary(["./Register", str(input_dir), str(output_dir)])
-    finally:
-        if str(input_dir).startswith(str(TMP_DIR)):
-            shutil.rmtree(input_dir, ignore_errors=True)
-    return {
+        files_b64 = _folder_to_base64(output_dir)
+        
+        return {
         "ok": True,
         "uploaded_files": count,
-        "encrypted_output_dir": str(output_dir),
-        #"stdout": result.stdout,
-        #"stderr": result.stderr,
-    }
+        "encrypted_biometrics": files_b64,
+        "stdout": result.stdout,
+        "stderr": result.stderr,
+        }
+    
+    finally:
+        shutil.rmtree(input_dir, ignore_errors=True)
+        shutil.rmtree(output_dir, ignore_errors=True)
 
+    
+    
+    
 
-def _task_encrypt_bio(input_dir: Path, output_dir: Path, count: int) -> dict:
+def _task_encrypt_bio(input_dir: Path, count: int) -> dict:
+    output_dir = Path(tempfile.mkdtemp(prefix="encrypt_out_", dir=str(TMP_DIR)))
     try:
         result = _run_binary(["./EncBio", str(input_dir), str(output_dir)])
-    finally:
-        if str(input_dir).startswith(str(TMP_DIR)):
-            shutil.rmtree(input_dir, ignore_errors=True)
-    return {
+        files_b64 = _folder_to_base64(output_dir)
+        return {
         "ok": True,
         "uploaded_files": count,
-        "encrypted_output_dir": str(output_dir),
-        #"stdout": result.stdout,
-        #"stderr": result.stderr,
-    }
+        "encrypted_biometrics": files_b64,
+        "stdout": result.stdout,
+        "stderr": result.stderr,
+        }
+    finally:
+        shutil.rmtree(input_dir, ignore_errors=True)
+        shutil.rmtree(output_dir, ignore_errors=True)
+    
 
 
-def _task_verify(threshold: int, test_dir: Path, stored_dir: Path) -> dict:
-    cmd = [
-        "./Verify",
-        str(threshold),
-        _path_with_trailing_sep(test_dir),
-        _path_with_trailing_sep(stored_dir),
-    ]
-    result = _run_binary(cmd)
-    match_line = next((l for l in result.stdout.splitlines() if "||" in l), "")
+def _task_verify(threshold: int, test_set: List[Biometric], registered_set: List[Biometric]) -> dict:
+    reg_dir = Path(tempfile.mkdtemp(prefix="verify_reg_", dir=str(TMP_DIR)))
+    test_dir = Path(tempfile.mkdtemp(prefix="verify_test_", dir=str(TMP_DIR)))
+    
+    try:
+        _write_biometrics(registered_set, reg_dir)
+        _write_biometrics(test_set, test_dir)
+
+
+        cmd = [
+            "./Verify",
+            str(threshold),
+            _path_with_trailing_sep(test_dir),
+            _path_with_trailing_sep(reg_dir),
+        ]
+        result = _run_binary(cmd)
+        match_line = next((l for l in result.stdout.splitlines() if "||" in l), "")
+
+    finally:
+        shutil.rmtree(reg_dir, ignore_errors=True)
+        shutil.rmtree(test_dir, ignore_errors=True)
+
+
     return {
         "ok": True,
         #"verify_result_line": match_line,
         "stdout": result.stdout,
         "stderr": result.stderr,
     }
-
+    
 
 # ---------------------------------------------------------------------------
 # Routes
@@ -417,24 +504,26 @@ def init_system() -> SessionCreated:
     dependencies=[Depends(_check_api_key)],
 )
 def register_biometrics(
-    # files: List[UploadFile] = File(...),
+    files: List[UploadFile] = File(...),
     # output_bucket: str = Form("default"),
-    payload: FolderRequest
 ) -> SessionCreated:
-    bucket = _sanitize_segment(payload.output_bucket)
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    
+    
+    #timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
 
-    # input_dir = Path(tempfile.mkdtemp(prefix="register_in_", dir=str(TMP_DIR)))
-    input_dir = _resolve_project_path(payload.input_folder)
-    output_dir = DATA_DIR / "CountryDB" / "Reg_Biometrics_Enc" / bucket / timestamp 
-    output_dir.mkdir(parents=True, exist_ok=True)
+    input_dir = Path(tempfile.mkdtemp(prefix="register_in_", dir=str(TMP_DIR)))
+    
+    
+    #output_dir.mkdir(parents=True, exist_ok=True)
+    # if not input_dir.exists():
+    #     raise HTTPException(status_code=400, detail="Input folder not found")
 
-    # count = _save_uploads(files, input_dir)
-    count = len(list(input_dir.iterdir()))
+    count = _save_uploads_grouped(files, input_dir)
+    #count = len(list(input_dir.iterdir()))
 
     session_id = _create_session("register")
     created_at = _sessions[session_id]["created_at"]
-    _run_session_thread(session_id, _task_register, input_dir, output_dir, count)
+    _run_session_thread(session_id, _task_register, input_dir, count)
     return _session_created_response(session_id, "register", created_at)
 
 
@@ -444,26 +533,25 @@ def register_biometrics(
     dependencies=[Depends(_check_api_key)],
 )
 def encrypt_test_biometrics(
-    # files: List[UploadFile] = File(...),
+    files: List[UploadFile] = File(...),
     # output_bucket: str = Form("default"),
-    payload: FolderRequest
+    #payload: FolderRequest
 ) -> SessionCreated:
-    bucket = _sanitize_segment(payload.output_bucket)
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    
+   #timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
 
-    #input_dir = Path(tempfile.mkdtemp(prefix="encbio_in_", dir=str(TMP_DIR)))
-    input_dir = _resolve_project_path(payload.input_folder)
-    output_dir = DATA_DIR / "E-Gate" / "Test_Bio_Enc" / bucket / timestamp
-    output_dir.mkdir(parents=True, exist_ok=True)
+    input_dir = Path(tempfile.mkdtemp(prefix="encbio_in_", dir=str(TMP_DIR)))
+    
+    #output_dir.mkdir(parents=True, exist_ok=True)
 
-    if not input_dir.exists() or not input_dir.is_dir():
-        raise HTTPException(status_code=400, detail=f"Input folder not found: {input_dir}")
+    # if not input_dir.exists() or not input_dir.is_dir():
+    #     raise HTTPException(status_code=400, detail=f"Input folder not found: {input_dir}")
 
-    count = len(list(input_dir.iterdir()))
+    count = _save_uploads_grouped(files, input_dir)
 
     session_id = _create_session("encrypt-bio")
     created_at = _sessions[session_id]["created_at"]
-    _run_session_thread(session_id, _task_encrypt_bio, input_dir, output_dir, count)
+    _run_session_thread(session_id, _task_encrypt_bio, input_dir, count)
     return _session_created_response(session_id, "encrypt-bio", created_at)
 
 
@@ -473,17 +561,18 @@ def encrypt_test_biometrics(
     dependencies=[Depends(_check_api_key)],
 )
 def verify_identity(payload: VerifyRequest) -> SessionCreated:
-    test_dir = _resolve_project_path(payload.test_encrypted_folder)
-    stored_dir = _resolve_project_path(payload.stored_encrypted_folder)
+    
 
-    if not test_dir.exists() or not test_dir.is_dir():
-        raise HTTPException(status_code=400, detail=f"Test folder not found: {test_dir}")
-    if not stored_dir.exists() or not stored_dir.is_dir():
-        raise HTTPException(status_code=400, detail=f"Stored folder not found: {stored_dir}")
+    #if not test_dir.exists() or not test_dir.is_dir():
+    #    raise HTTPException(status_code=400, detail=f"Test folder not found: {test_dir}")
+    #if not stored_dir.exists() or not stored_dir.is_dir():
+    #    raise HTTPException(status_code=400, detail=f"Stored folder not found: {stored_dir}")
 
     session_id = _create_session("verify")
     created_at = _sessions[session_id]["created_at"]
-    _run_session_thread(session_id, _task_verify, payload.threshold, test_dir, stored_dir)
+    
+    
+    _run_session_thread(session_id, _task_verify, payload.threshold, payload.test_enc_set, payload.registered_enc_set)
     return _session_created_response(session_id, "verify", created_at)
 
 
