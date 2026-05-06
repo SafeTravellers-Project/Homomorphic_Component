@@ -110,48 +110,23 @@ def _folder_to_base64(output_dir: Path) -> List[dict]:
     Converts all files in a folder into base64 JSON payload.
     """
     results = []
-    expected = {"ciph", "cosineciph", "sqciph"}
-
     for bio_dir in output_dir.iterdir():
         if not bio_dir.is_dir():
             continue
 
         files = []
 
-        seen = set()
-
         for file_path in bio_dir.iterdir():
-            if not file_path.is_file():
-                continue
-
-            name = file_path.name
-
-            if name not in expected:
-                raise RuntimeError(
-                    f"Unexpected file '{name}' in {bio_dir}"
-                )
-
-            files.append({
-                "name": name,
-                "content_base64": base64.b64encode(file_path.read_bytes()).decode()
-            })
-
-            seen.add(name)
-
-        #  enforce completeness
-        if seen != expected:
-            raise RuntimeError(
-                f"Incomplete biometric '{bio_dir.name}', found {seen}"
-            )
+            if file_path.is_file():
+                files.append({
+                    "name": file_path.name,
+                    "content_base64": base64.b64encode(file_path.read_bytes()).decode()
+                })
 
         results.append({
             "bio_name": bio_dir.name,
             "files": files
         })
-
-    # Optional: ensure at least one biometric exists
-    if not results:
-        raise RuntimeError("No biometric output found")
 
     return results
 
@@ -221,47 +196,28 @@ def _run_binary(command: List[str]) -> CommandResponse:
     return response
 
 
-def _save_uploads(files: List[UploadFile], destination: Path) -> int:
-    destination.mkdir(parents=True, exist_ok=True)
-    saved_count = 0
-    for file in files:
-        filename = Path(file.filename or "").name
-        if not filename:
-            continue
-        target = destination / filename
-        with target.open("wb") as out:
-            shutil.copyfileobj(file.file, out)
-        saved_count += 1
-    if saved_count == 0:
-        raise HTTPException(status_code=400, detail="No valid files uploaded")
-    return saved_count
 
-def _save_uploads_grouped(files: List[UploadFile], destination: Path) -> int:
+def _save_uploads_flat(files: List[UploadFile], destination: Path) -> int:
     destination.mkdir(parents=True, exist_ok=True)
+
     count = 0
 
     for file in files:
         filename = Path(file.filename or "").name
+
         if not filename:
             continue
 
-        bio_name = Path(filename).stem  # face.bin → face
-
-        bio_dir = destination / bio_name
-        bio_dir.mkdir(parents=True, exist_ok=True)
-
-        target = bio_dir / filename
-
+        target = destination / filename
         with target.open("wb") as out:
             shutil.copyfileobj(file.file, out)
 
         count += 1
 
     if count == 0:
-        raise HTTPException(status_code=400, detail="No valid files uploaded")
+        raise HTTPException(400, "No valid files uploaded")
 
     return count
-
 
 
 def _path_with_trailing_sep(path_obj: Path) -> str:
@@ -540,7 +496,7 @@ def register_biometrics(
     # if not input_dir.exists():
     #     raise HTTPException(status_code=400, detail="Input folder not found")
 
-    count = _save_uploads_grouped(files, input_dir)
+    count = _save_uploads_flat(files, input_dir)
     #count = len(list(input_dir.iterdir()))
 
     session_id = _create_session("register")
@@ -569,7 +525,7 @@ def encrypt_test_biometrics(
     # if not input_dir.exists() or not input_dir.is_dir():
     #     raise HTTPException(status_code=400, detail=f"Input folder not found: {input_dir}")
 
-    count = _save_uploads_grouped(files, input_dir)
+    count = _save_uploads_flat(files, input_dir)
 
     session_id = _create_session("encrypt-bio")
     created_at = _sessions[session_id]["created_at"]
