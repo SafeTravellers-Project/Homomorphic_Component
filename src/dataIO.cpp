@@ -4,6 +4,9 @@
 #include <sstream>
 #include <iostream>
 #include <stdio.h>
+#include <vector>
+#include <cmath>
+#include <string>
 namespace fs = std::experimental::filesystem;
 //std::experimental::
 #include "dataIO.h"
@@ -11,6 +14,126 @@ using namespace std;
 using namespace seal;
 
 
+
+
+VectorValidation dataIO::validateAndNormalize(
+    std::vector<float>& vec,        // in/out: modified in place if needed
+    int precision,
+    uint32_t modulus)
+{
+    static long int pow10[12] = {
+        1, 10, 100, 1000, 10000, 100000, 1000000, 
+        10000000, 100000000, 1000000000, 10000000000, 100000000000
+    };
+
+    VectorValidation result;
+    result.is_valid = true;
+    int size = vec.size();
+    long int scale     = pow10[precision - 1];       // s      = 100
+    long int scale_sq  = pow10[2 * (precision - 1)]; // s²     = 10,000
+    int64_t  half_p    = (int64_t)modulus / 2;       // p/2    = 30,000
+
+    // -------------------------------------------------------
+    // Step 1: Compute raw norm and max component
+    // -------------------------------------------------------
+    double norm_sq = 0.0;
+    float  max_abs = 0.0f;
+    for (int i = 0; i < size; i++) {
+        norm_sq += (double)vec[i] * vec[i];
+        if (std::abs(vec[i]) > max_abs)
+            max_abs = std::abs(vec[i]);
+    }
+    float raw_norm = (float)std::sqrt(norm_sq);
+    result.raw_norm = raw_norm;
+
+    // -------------------------------------------------------
+    // Step 2: Check if raw components overflow p when scaled
+    // -------------------------------------------------------
+    // Each raw component scaled: vec[i] * s must fit in [-p/2, p/2]
+    float max_scaled_component = max_abs * scale;
+    result.max_component_scaled = max_scaled_component;
+    if (max_scaled_component > (float)half_p) {
+        result.is_valid = false;
+        result.error_msg = "Raw component overflow: max_scaled=" 
+                         + std::to_string(max_scaled_component)
+                         + " > p/2=" + std::to_string(half_p);
+        // Rescale so max component fits within p/2 with 20% margin
+        float safe_scale = (float)(half_p * 0.8) / max_abs;
+        std::cout << "  Rescaling raw vector by " << safe_scale 
+                  << " (was scale=" << scale << ")" << std::endl;
+        for (int i = 0; i < size; i++)
+            vec[i] *= (safe_scale / scale); // adjust to be re-multiplied by scale later
+    }
+
+    // -------------------------------------------------------
+    // Step 3: Check square sum for readPlaintextSquare
+    // -------------------------------------------------------
+    // sum = s² * Σvᵢ² = scale_sq * norm_sq
+    double square_sum = scale_sq * norm_sq;
+    result.square_sum_scaled = (float)square_sum;
+    if (square_sum > (double)half_p) {
+        result.is_valid = false;
+        result.error_msg += " | Square sum overflow: sum=" 
+                          + std::to_string(square_sum)
+                          + " > p/2=" + std::to_string(half_p);
+        // Force L2-normalize so norm becomes 1.0
+        // After normalization: square_sum = scale_sq * 1.0 = 10,000 << p/2=30,000
+        std::cout << "  L2-normalizing vector (norm was " << raw_norm << ")" << std::endl;
+        for (int i = 0; i < size; i++)
+            vec[i] /= raw_norm;
+        // Recompute norm_sq after normalization
+        norm_sq = 1.0;
+        square_sum = scale_sq * norm_sq;
+    }
+
+    // -------------------------------------------------------
+    // Step 4: Check cosine inner product bound
+    // -------------------------------------------------------
+    // After normalization, max inner product = scale_sq * 1.0 = 10,000
+    // This is always safe if Step 3 passed, but verify explicitly
+    double max_inner_product = scale_sq * norm_sq; // = scale_sq if normalized
+    if (max_inner_product > (double)half_p) {
+        result.is_valid = false;
+        result.error_msg += " | Cosine inner product overflow: max=" 
+                          + std::to_string(max_inner_product)
+                          + " > p/2=" + std::to_string(half_p);
+    }
+
+    // -------------------------------------------------------
+    // Step 5: Final report
+    // -------------------------------------------------------
+    std::cout << "[validateAndNormalize]"
+              << " norm=" << raw_norm
+              << " | max_comp_scaled=" << max_scaled_component
+              << " | square_sum=" << result.square_sum_scaled
+              << " | p/2=" << half_p
+              << " | status=" << (result.is_valid ? "OK" : "FIXED")
+              << std::endl;
+    if (!result.error_msg.empty())
+        std::cout << "  Issues fixed: " << result.error_msg << std::endl;
+
+    return result;
+}
+
+
+std::vector<float> dataIO::loadRawVector(std::string path, int size)
+{
+    std::vector<float> vec(size);
+    FILE* f = fopen(path.c_str(), "r");
+    if (!f) {
+        std::cerr << "ERROR: Could not open file: " << path << std::endl;
+        return {};
+    }
+    for (int i = 0; i < size; i++) {
+        if (fscanf(f, "%f ", &vec[i]) != 1) {
+            std::cerr << "ERROR: Failed to read float at index " << i << std::endl;
+            fclose(f);
+            return {};
+        }
+    }
+    fclose(f);
+    return vec;
+}
 
 void dataIO::readPlaintext_Int_woMod(seal::Plaintext * plaintext, std::string path, uint32_t modulus)
 {
@@ -60,16 +183,20 @@ void dataIO::readPlaintext(seal::Plaintext * plaintext, std::string path, int si
   {
       1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000
   };
-  FILE * f;
-  const char * char_path = path.c_str();
-  f = fopen(char_path, "r");
+  // FILE * f;
+  // const char * char_path = path.c_str();
+  // f = fopen(char_path, "r");
   
-  // Check if file opened successfully
-  if (f == NULL) {
-    std::cerr << "ERROR: Could not open file: " << path << std::endl;
-    return;
-  }
+  // // Check if file opened successfully
+  // if (f == NULL) {
+  //   std::cerr << "ERROR: Could not open file: " << path << std::endl;
+  //   return;
+  // }
   
+  std::vector<float> vec = loadRawVector(path, size);
+    if (vec.empty()) return;
+    validateAndNormalize(vec, precision, modulus);  // fixes in place if needed
+
   // Get an appropriate plaintext for that size
   int pt_size = 4096;
   plaintext->resize(pt_size);
@@ -84,12 +211,13 @@ void dataIO::readPlaintext(seal::Plaintext * plaintext, std::string path, int si
   
   for (int i = 0; i < size; i++)
   {
-    int result = fscanf(f, "%f ", &floatTemp);
-    if (result != 1) {
-      std::cerr << "ERROR: Failed to read float at index " << i << " from file: " << path << std::endl;
-      fclose(f);
-      return;
-    }
+    floatTemp = vec[i];
+    // int result = fscanf(f, "%f ", &floatTemp);
+    // if (result != 1) {
+    //   std::cerr << "ERROR: Failed to read float at index " << i << " from file: " << path << std::endl;
+    //   fclose(f);
+    //   return;
+    // }
     if (floatTemp > 0)
       intTemp = (int) (floatTemp * pow10[precision-1] + 0.5);   // The +0.5 is there for rounding and not truncating
     else
@@ -116,7 +244,7 @@ void dataIO::readPlaintext(seal::Plaintext * plaintext, std::string path, int si
     *plaintext->data(coef_place) = intTemp;
   }
  // cout << "The max coefficient is: " << max << '\n';
-  fclose(f);
+//  fclose(f);
 }
 
 
@@ -128,16 +256,19 @@ void dataIO::readPlaintextSquare(seal::Plaintext * plaintext, std::string path, 
       1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000
   };
 
-  FILE * f;
-  const char * char_path = path.c_str();
-  f = fopen(char_path, "r");
+  // FILE * f;
+  // const char * char_path = path.c_str();
+  // f = fopen(char_path, "r");
   
-  // Check if file opened successfully
-  if (f == NULL) {
-    std::cerr << "ERROR: Could not open file: " << path << std::endl;
-    return;
-  }
+  // // Check if file opened successfully
+  // if (f == NULL) {
+  //   std::cerr << "ERROR: Could not open file: " << path << std::endl;
+  //   return;
+  // }
 
+  std::vector<float> vec = loadRawVector(path, size);
+    if (vec.empty()) return;
+    validateAndNormalize(vec, precision, modulus);  // fixes in place if needed
   // Get an appropriate plaintext for that size
   int pt_size = 4096;
   plaintext->resize(pt_size);
@@ -155,12 +286,13 @@ void dataIO::readPlaintextSquare(seal::Plaintext * plaintext, std::string path, 
 
   for (int i = 0; i < size; i++)
   {
-    int result = fscanf(f, "%f ", &floatTemp);
-    if (result != 1) {
-      std::cerr << "ERROR: Failed to read float at index " << i << " from file: " << path << std::endl;
-      fclose(f);
-      return;
-    }
+    // int result = fscanf(f, "%f ", &floatTemp);
+    // if (result != 1) {
+    //   std::cerr << "ERROR: Failed to read float at index " << i << " from file: " << path << std::endl;
+    //   fclose(f);
+    //   return;
+    // }
+    floatTemp = vec[i];
     floatTemp2 = floatTemp*floatTemp;
     // Here we wil multiply by the square of the precision
     if (floatTemp2 > 0)
@@ -182,7 +314,7 @@ void dataIO::readPlaintextSquare(seal::Plaintext * plaintext, std::string path, 
   }
  // cout << "The sum has been added: " << sum << '\n';
   *plaintext->data(pt_size-1) = sum;
-  fclose(f);
+  //fclose(f);
 }
 
 
@@ -194,15 +326,19 @@ void dataIO::readPlaintextCosine(seal::Plaintext * plaintext, std::string path, 
       1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000
   };
 
-  FILE * f;
-  const char * char_path = path.c_str();
-  f = fopen(char_path, "r");
+  // FILE * f;
+  // const char * char_path = path.c_str();
+  // f = fopen(char_path, "r");
   
-  // Check if file opened successfully
-  if (f == NULL) {
-    std::cerr << "ERROR: Could not open file: " << path << std::endl;
-    return;
-  }
+  // // Check if file opened successfully
+  // if (f == NULL) {
+  //   std::cerr << "ERROR: Could not open file: " << path << std::endl;
+  //   return;
+  // }
+
+std::vector<float> vec = loadRawVector(path, size);
+    if (vec.empty()) return;
+    validateAndNormalize(vec, precision, modulus);  // fixes in place if needed
 
   // Get an appropriate plaintext for that size
   int pt_size = 4096;
@@ -221,21 +357,27 @@ void dataIO::readPlaintextCosine(seal::Plaintext * plaintext, std::string path, 
   //cout<< "In readPlaintextCosine, the size is: " << size << '\n';
   for (int i = 0; i < size; i++)   // First computing the \sum a_i^2  or \sum b_i^2
   {
-    int result = fscanf(f, "%f ", &floatTemp[i]);
-    if (result != 1) {
-      std::cerr << "ERROR: Failed to read float at index " << i << " from file: " << path << std::endl;
-      fclose(f);
-      return;
-    }
+    // int result = fscanf(f, "%f ", &floatTemp[i]);
+    // if (result != 1) {
+    //   std::cerr << "ERROR: Failed to read float at index " << i << " from file: " << path << std::endl;
+    //   fclose(f);
+    //   return;
+    // }
+    floatTemp[i] = vec[i];
     floatTemp2 = floatTemp[i]*floatTemp[i];
     
     Temp_float_sum += floatTemp2;
 
   }
-
+  float sqrt_sum = sqrt(Temp_float_sum);
+  if (sqrt_sum == 0)
+  {
+    std::cout << "WARNING: the sum of the squares of the coefficients is zero, cannot compute cosine similarity. " <<   '\n';
+    return;
+  }
   for (int i =0 ; i < size ;i++){  // now computing the a_i/\sum a_i^2 or b_i/\sum b_i^2
     {
-    float_arr[i] = (floatTemp[i]/(float) sqrt(Temp_float_sum));}
+    float_arr[i] = (floatTemp[i]/(float) sqrt_sum);}
     if (float_arr[i] > 0)
       finalint[i] = (int) (float_arr[i] * pow10[precision-1] + 0.5);   // The +0.5 is there for rounding and not truncating
     else
@@ -257,7 +399,7 @@ void dataIO::readPlaintextCosine(seal::Plaintext * plaintext, std::string path, 
 
     *plaintext->data(coef_place) = finalint[i];
     }
-  fclose(f);
+  //fclose(f);
 
 }
 

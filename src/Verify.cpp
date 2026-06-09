@@ -174,6 +174,9 @@ if (!fs::exists(folderName_model_old_root)) {
 
 double total_bin_duration = 0.0;
 double total_cos_duration = 0.0;
+double total_tfhe_duration = 0.0;
+
+clock_t total_bin_start = clock();
 
 for (const auto &egate_entry : fs::directory_iterator(folderName_model_new_root)) {
 
@@ -572,9 +575,25 @@ torusTemp = lweSymDecrypt(lweCos_boot_final, out2_lwe_key, p);
 int intTemp = modSwitchFromTorus32(torusTemp, p);
 double doubleTemp = ((double) intTemp - p*(intTemp >= p/2))/pow10[2*(precision-1)];
 
+cout << "Plaintext mod value is : " << p << endl;
+cout << "The precision value is : " << pow10[2*(precision-1)] << endl;
+// *********************Additional part , synthetic**************************************************
+double synthetic_cosine; // this is just for testing the output format and the sanity of the values. This needs to be removed in the final version. 
+if (flag == "Accept") & ((doubleTemp >1.0) || doubleTemp < -1.0))
+{
+    synthetic_cosine = 0.5 + 0.5*(double(rand()) / RAND_MAX); // this is just for testing the output format and the sanity of the values. This needs to be removed in the final version.
+} 
+
+if (flag == "Reject") & ((doubleTemp >1.0) || doubleTemp < -1.0))
+{
+    synthetic_cosine = 0.5*(double(rand()) / RAND_MAX); // this is just for testing the output format and the sanity of the values. This needs to be removed in the final version.
+} 
+
+
 cout << " **************************************************************" << endl;
 //cout << " Result given as - > Accept/Reject decision || Cosine Similarity Value " << endl;
-std::cout << egate_biometric_path <<  "||" << flag << " || " << doubleTemp <<  '\n';
+std::cout << egate_biometric_path <<  "||" << flag << " || " << doubleTemp <<  '\n';  
+//std::cout << egate_biometric_path <<  "||" << flag << " || " << synthetic_cosine <<  '\n';
   
 total_bin_duration += bin_duration;
 total_cos_duration += cos_duration;
@@ -605,6 +624,10 @@ cout << "***********************************************************************
 cout << "Total time for accept/reject check : " << total_bin_duration << " seconds" << endl;
 
 std::cout << "Cosine computation duration: " << total_cos_duration << " seconds" << std::endl;
+
+clock_t total_bin_end = clock();
+total_bin_duration = double(total_bin_end - total_bin_start) / CLOCKS_PER_SEC;
+std::cout << "Total execution time: " << total_bin_duration << " seconds" << std::endl;
 
 //}
 // delete_LweSample(lwe_act);

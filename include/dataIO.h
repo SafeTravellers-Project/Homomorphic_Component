@@ -19,8 +19,22 @@
 #include "tfhe.h"
 
 //template<typename TORUS>
+
+struct VectorValidation {
+    bool is_valid;
+    float raw_norm;
+    float max_component_scaled;
+    float square_sum_scaled;
+    std::string error_msg;
+};
+
 struct dataIO
 {
+  static VectorValidation validateAndNormalize(
+    std::vector<float>& vec,        // in/out: modified in place if needed
+    int precision,
+    uint32_t modulus);
+  static std::vector<float> loadRawVector(std::string path, int size);
   static void readPlaintext_Int_woMod(seal::Plaintext * plaintext, std::string path, uint32_t modulus);
   
   static void makePlaintext(seal::Plaintext * plaintext, int32_t value, int size, uint32_t modulus);
