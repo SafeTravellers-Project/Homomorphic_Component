@@ -130,6 +130,8 @@ std::vector<float> dataIO::loadRawVector(std::string path, int size)
             fclose(f);
             return {};
         }
+      if (i < 10)
+        cout << "Coefficient: " << i << " : read from file: " << vec[i] << '\n';
     }
     fclose(f);
     return vec;
