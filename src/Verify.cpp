@@ -353,21 +353,21 @@ clock_t bin_end2=clock();
 // // // FILE * b_lweKey_file = fopen("../data/Traveller/lwe_b.txt" , "r");
 // // // LweKey * b_lwe_key = new_lweKey_fromFile(b_lweKey_file);
 // // // fclose(b_lweKey_file);
- FILE * init_lweKey_file = fopen("../data/Traveller/lwe_in.txt" , "r");
- LweKey * init_lwe_key = new_lweKey_fromFile(init_lweKey_file);
- fclose(init_lweKey_file);
+//  FILE * init_lweKey_file = fopen("../data/Traveller/lwe_in.txt" , "r");
+//  LweKey * init_lwe_key = new_lweKey_fromFile(init_lweKey_file);
+//  fclose(init_lweKey_file);
 // // // // cout << "Here 296" << endl;
- static long int t_pow10[12] =
-     {
-         1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000
-     };
+//  static long int t_pow10[12] =
+//      {
+//          1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000
+//      };
 // // // for (int i = 1; i < 5; i++)
 // // // {
 // // //   cout << "precision : " << i << " : " <<  t_pow10[i-1] << " || " <<  t_pow10[2*(i-1)] << '\n';
 // // // }    
- Torus32 t_torusTemp,t_torusTemp_act, t_torusTemp1,t_torusTemp2,t_torusTemp3;
- int t_intTemp,t_intTemp_act,t_intTemp1,t_intTemp2,t_intTemp3;
- double t_doubleTemp,t_doubleTemp_act,t_doubleTemp1,t_doubleTemp2,t_doubleTemp3;
+//  Torus32 t_torusTemp,t_torusTemp_act, t_torusTemp1,t_torusTemp2,t_torusTemp3;
+//  int t_intTemp,t_intTemp_act,t_intTemp1,t_intTemp2,t_intTemp3;
+//  double t_doubleTemp,t_doubleTemp_act,t_doubleTemp1,t_doubleTemp2,t_doubleTemp3;
 // LweSample * lwe_t_ks = new_LweSample(init_lwe_params);
 // lweKeySwitch(lwe_t_ks, ks_med_key, lwe_t);
 // LweSample * lwe_act_ks = new_LweSample(init_lwe_params);
@@ -389,12 +389,12 @@ clock_t bin_end2=clock();
 // t_torusTemp2 = lweSymDecrypt(lwe_t_ks2, init_lwe_key, p);
 // t_intTemp2 = modSwitchFromTorus32(t_torusTemp2, p);
 // t_doubleTemp2 = ((double) t_intTemp2 - p*(t_intTemp2 >= p/2))/t_pow10[2*(precision-1)];
- LweSample * lwe_t_ks3 = new_LweSample(init_lwe_params);
- lweKeySwitch(lwe_t_ks3, ks_med_key, lwe_act);
- t_torusTemp3 = lweSymDecrypt(lwe_t_ks3, init_lwe_key, p);
- t_intTemp3 = modSwitchFromTorus32(t_torusTemp3, p);
-t_doubleTemp3 = ((double) t_intTemp3 - p*(t_intTemp3 >= p/2))/t_pow10[2*(precision-1)];
-std::cout << "The distance threshold diff was  " << t_intTemp_act <<"  :: :: " << t_doubleTemp_act <<  '\n';
+//  LweSample * lwe_t_ks3 = new_LweSample(init_lwe_params);
+//  lweKeySwitch(lwe_t_ks3, ks_med_key, lwe_act);
+//  t_torusTemp3 = lweSymDecrypt(lwe_t_ks3, init_lwe_key, p);
+//  t_intTemp3 = modSwitchFromTorus32(t_torusTemp3, p);
+// t_doubleTemp3 = ((double) t_intTemp3 - p*(t_intTemp3 >= p/2))/t_pow10[2*(precision-1)];
+// std::cout << "The distance threshold diff was  " << t_intTemp_act <<"  :: :: " << t_doubleTemp_act <<  '\n';
 // std::cout << "The distance difference was  " << t_intTemp <<"  :: :: " << t_doubleTemp <<  '\n';
 // std::cout << "2ab was  " << t_intTemp1 <<"  :: :: " << t_doubleTemp1 <<  '\n';
 // std::cout << "b^2 was  " << t_intTemp2 <<"  :: :: " << t_doubleTemp2 <<  '\n';
@@ -575,19 +575,19 @@ torusTemp = lweSymDecrypt(lweCos_boot_final, out2_lwe_key, p);
 int intTemp = modSwitchFromTorus32(torusTemp, p);
 double doubleTemp = ((double) intTemp - p*(intTemp >= p/2))/pow10[2*(precision-1)];
 
-cout << "Plaintext mod value is : " << p << endl;
-cout << "The precision value is : " << pow10[2*(precision-1)] << endl;
+// cout << "Plaintext mod value is : " << p << endl;
+// cout << "The precision value is : " << pow10[2*(precision-1)] << endl;
 // *********************Additional part , synthetic**************************************************
-double synthetic_cosine; // this is just for testing the output format and the sanity of the values. This needs to be removed in the final version. 
-if ((flag == "Accept") && ((doubleTemp >1.0) || (doubleTemp < -1.0)))
-{
-    synthetic_cosine = 0.5 + 0.5*(double(rand()) / RAND_MAX); // this is just for testing the output format and the sanity of the values. This needs to be removed in the final version.
-} 
+// double synthetic_cosine; // this is just for testing the output format and the sanity of the values. This needs to be removed in the final version. 
+// if ((flag == "Accept") && ((doubleTemp >1.0) || (doubleTemp < -1.0)))
+// {
+//     synthetic_cosine = 0.5 + 0.5*(double(rand()) / RAND_MAX); // this is just for testing the output format and the sanity of the values. This needs to be removed in the final version.
+// } 
 
-if ((flag == "Reject") && ((doubleTemp >1.0) || (doubleTemp < -1.0)))
-{
-    synthetic_cosine = 0.5*(double(rand()) / RAND_MAX); // this is just for testing the output format and the sanity of the values. This needs to be removed in the final version.
-} 
+// if ((flag == "Reject") && ((doubleTemp >1.0) || (doubleTemp < -1.0)))
+// {
+//     synthetic_cosine = 0.5*(double(rand()) / RAND_MAX); // this is just for testing the output format and the sanity of the values. This needs to be removed in the final version.
+// } 
 
 
 cout << " **************************************************************" << endl;
