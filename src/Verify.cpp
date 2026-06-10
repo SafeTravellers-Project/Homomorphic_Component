@@ -579,12 +579,12 @@ cout << "Plaintext mod value is : " << p << endl;
 cout << "The precision value is : " << pow10[2*(precision-1)] << endl;
 // *********************Additional part , synthetic**************************************************
 double synthetic_cosine; // this is just for testing the output format and the sanity of the values. This needs to be removed in the final version. 
-if (flag == "Accept") & ((doubleTemp >1.0) || doubleTemp < -1.0))
+if ((flag == "Accept") && ((doubleTemp >1.0) || (doubleTemp < -1.0)))
 {
     synthetic_cosine = 0.5 + 0.5*(double(rand()) / RAND_MAX); // this is just for testing the output format and the sanity of the values. This needs to be removed in the final version.
 } 
 
-if (flag == "Reject") & ((doubleTemp >1.0) || doubleTemp < -1.0))
+if ((flag == "Reject") && ((doubleTemp >1.0) || (doubleTemp < -1.0)))
 {
     synthetic_cosine = 0.5*(double(rand()) / RAND_MAX); // this is just for testing the output format and the sanity of the values. This needs to be removed in the final version.
 } 
