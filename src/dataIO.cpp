@@ -125,13 +125,21 @@ std::vector<float> dataIO::loadRawVector(std::string path, int size)
         return {};
     }
     for (int i = 0; i < size; i++) {
-        if (fscanf(f, "%f ", &vec[i]) != 1) {
-            std::cerr << "ERROR: Failed to read float at index " << i << std::endl;
+      if (fscanf(f, "%f", &vec[i]) != 1) {
+            std::cerr << "ERROR: Failed to read float at index "
+                      << i << std::endl;
             fclose(f);
             return {};
-        }
+      }
+
+        // Consume optional comma
+        int c = fgetc(f);
+        if (c != ',' && c != EOF)
+            ungetc(c, f);
+
       if (i < 10)
-        cout << "Coefficient: " << i << " : read from file: " << vec[i] << '\n';
+          std::cout << "Coefficient: " << i
+              << " : read from file: " << vec[i] << '\n';
     }
     fclose(f);
     return vec;
