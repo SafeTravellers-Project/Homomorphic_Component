@@ -6,6 +6,7 @@
 #include "seal/seal.h"
 #include <ctime>
 #include "keysEGate.h"
+#include "keysUser.h"
 using namespace std;
 using namespace seal;
  
@@ -17,6 +18,7 @@ paramsGen::generateSealParams();
 paramsGen::generateTFHEParams();
 HEKeyGen::generateHEkeys();
 EGateKeyGen::generateEGatekeys();
+UserKeyGen::generateUserKeys();
 
 clock_t end = clock();
 double elapsed_secs = double(end - start) / CLOCKS_PER_SEC;

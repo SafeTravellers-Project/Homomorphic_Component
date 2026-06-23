@@ -42,7 +42,7 @@ set(OPENSSL_LIBRARIES "${LIBS_DIR}/openssl-3.0.14/install/lib64")
 
 
 #Addn executabkes
-add_executable(HESysInit src/HESysInit.cpp src/params.cpp src/keysHEComp.cpp src/keysEGate.cpp) 
+add_executable(HESysInit src/HESysInit.cpp src/params.cpp src/keysHEComp.cpp src/keysEGate.cpp src/keysUser.cpp src/utils.cpp) 
 add_executable(Register src/Register.cpp src/keysUser.cpp src/utils.cpp src/dataIO.cpp src/token.cpp )
 add_executable(EncBio src/Enc_Test_Bio.cpp src/params.cpp src/dataIO.cpp )
 add_executable(Verify src/Verify.cpp src/keysEGate.cpp src/token.cpp src/params.cpp src/dataIO.cpp src/utils.cpp)

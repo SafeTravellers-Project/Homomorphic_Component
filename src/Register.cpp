@@ -96,8 +96,8 @@ int main(int argc, char *argv[])
   //// ******** INSERT CODE HERE FOR CHECKING IF USER IS ALREADY REGISTERED ******** ////
 
   // Generating User Keys
-  cout << "Generating User Keys..." << endl;
-  UserKeyGen::generateUserKeys();
+  // cout << "Generating User Keys..." << endl;
+  // UserKeyGen::generateUserKeys();
 
 
 
@@ -124,7 +124,7 @@ SEALContext context(parms);
 PublicKey init_public_key;
 
   filebuf bin_sealpubK_handler;
-  if (bin_sealpubK_handler.open("../data/Traveller/sealpubK.txt", ios::in | ios::binary))
+  if (bin_sealpubK_handler.open("../data/Keys/sealpubK.txt", ios::in | ios::binary))
     { //std::cout << "In here" << '\n';
     istream is(&bin_sealpubK_handler);
     init_public_key.load(context,is);

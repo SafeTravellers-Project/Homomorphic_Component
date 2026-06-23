@@ -143,13 +143,13 @@ if (!is_valid_for(init_public_key,context)){
   throw std::runtime_error("Public key is not valid for this context ");
 }
  filebuf bin_sealpubK_handler;
-  bin_sealpubK_handler.open("../data/Traveller/sealpubK.txt", ios::out | ios::binary);
+  bin_sealpubK_handler.open("../data/Keys/sealpubK.txt", ios::out | ios::binary);
     ostream os(&bin_sealpubK_handler);
     init_public_key.save(os);
   bin_sealpubK_handler.close();
 
   filebuf bin_sealpvtK_handler;
-  bin_sealpvtK_handler.open("../data/Traveller/sealpvtK.txt", ios::out | ios::binary);
+  bin_sealpvtK_handler.open("../data/Keys/sealpvtK.txt", ios::out | ios::binary);
     ostream os2(&bin_sealpvtK_handler);
     init_seal_key.save(os2);
   bin_sealpvtK_handler.close();
@@ -159,7 +159,7 @@ if (parms.poly_modulus_degree() > 2048 )
   RelinKeys relin_keys;
   init_keygen.create_relin_keys(relin_keys);
   filebuf bin_sealrelinK_handler;
-  bin_sealrelinK_handler.open("../data/Traveller/sealrelinK.txt", ios::out | ios::binary);
+  bin_sealrelinK_handler.open("../data/Keys/sealrelinK.txt", ios::out | ios::binary);
     ostream os3(&bin_sealrelinK_handler);
     relin_keys.save(os3);
   bin_sealrelinK_handler.close();
@@ -214,17 +214,17 @@ cout << "Bridge to init KSK made" << endl;
 
 /****************************************************************** */
 /* This following is only for testing purposes...delete in the final version*/
-FILE * b_lweKey_file = fopen("../data/Traveller/lwe_b.txt" , "w");
+FILE * b_lweKey_file = fopen("../data/Keys/lwe_b.txt" , "w");
 export_lweKey_toFile(b_lweKey_file,b_lwe_key);   
 fclose(b_lweKey_file);
-FILE * init_lweKey_file = fopen("../data/Traveller/lwe_in.txt" , "w");
+FILE * init_lweKey_file = fopen("../data/Keys/lwe_in.txt" , "w");
 export_lweKey_toFile(init_lweKey_file,init_lwe_key);   
 fclose(init_lweKey_file);
-FILE * b_tlweKey_file = fopen("../data/Traveller/tlwe_b.txt" , "w");
+FILE * b_tlweKey_file = fopen("../data/Keys/tlwe_b.txt" , "w");
 export_tlweKey_toFile(b_tlweKey_file,b_tlwe_key);   
 fclose(b_tlweKey_file);
 /******************************************************************** */
-FILE * ks_med_key_file = fopen("../data/Traveller/KSKmed.data" , "w");
+FILE * ks_med_key_file = fopen("../data/Keys/KSKmed.data" , "w");
 export_lweKeySwitchKey_toFile(ks_med_key_file, ks_med_key);
 fclose(ks_med_key_file);
 
@@ -242,7 +242,7 @@ clock_t start_usr_kgen3 = clock();
 LweKeySwitchKey * ks_inout_key = new_LweKeySwitchKey(1024, switch_t, switch_base, out_lwe_params);
 lweCreateKeySwitchKey(ks_inout_key, init_lwe_key, out1_lwe_key);
 clock_t end_usr_kgen3 = clock();
-FILE * ks_inout_key_file = fopen("../data/Traveller/KSKinout.data" , "w");
+FILE * ks_inout_key_file = fopen("../data/Keys/KSKinout.data" , "w");
 export_lweKeySwitchKey_toFile(ks_inout_key_file, ks_inout_key);
 fclose(ks_inout_key_file);
 
@@ -296,7 +296,7 @@ LweBootstrappingKey * boot_key = new_LweBootstrappingKey(switch_t , switch_base,
     clock_t end_usr_kgen4 = clock();
 //LweBootstrappingKeyFFT * boot_key_fft = new_LweBootstrappingKeyFFT(boot_key);
 // Export the bootstrapping key to a file
-FILE * boot_key_file = fopen("../data/Traveller/bootK.data" , "w");
+FILE * boot_key_file = fopen("../data/Keys/bootK.data" , "w");
 export_lweBootstrappingKey_toFile(boot_key_file,boot_key);
 fclose(boot_key_file);
 

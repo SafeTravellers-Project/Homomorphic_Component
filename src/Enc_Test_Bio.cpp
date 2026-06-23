@@ -49,7 +49,7 @@ SEALContext context(parms);
 
 PublicKey init_public_key;
  filebuf bin_sealpubK_handler;
-  bin_sealpubK_handler.open("../data/Traveller/sealpubK.txt", ios::in | ios::binary); // this needs to be changed for every traveller. For initial testing we are using a predefined key.
+  bin_sealpubK_handler.open("../data/Keys/sealpubK.txt", ios::in | ios::binary); // this needs to be changed for every traveller. For initial testing we are using a predefined key.
     istream is(&bin_sealpubK_handler);
     init_public_key.load(context,is);
     bin_sealpubK_handler.close();

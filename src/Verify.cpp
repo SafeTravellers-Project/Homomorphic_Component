@@ -60,7 +60,7 @@ SEALContext context(parms);
 
 PublicKey init_public_key;
 filebuf bin_sealpubK_handler;
-bin_sealpubK_handler.open("../data/Traveller/sealpubK.txt", ios::in | ios::binary); // this needs to be changed for every traveller. For initial testing we are using a predefined key.
+bin_sealpubK_handler.open("../data/Keys/sealpubK.txt", ios::in | ios::binary); // this needs to be changed for every traveller. For initial testing we are using a predefined key.
 istream is(&bin_sealpubK_handler);
 init_public_key.load(context,is);
 bin_sealpubK_handler.close();
@@ -114,23 +114,23 @@ std::cout << "The size of Poly Modulus Degree has to be greater than that of the
 /* Copy the keys that are going to be used again and again*/
 RelinKeys relin_key;
 filebuf bin_sealrelinK_handler;
-bin_sealrelinK_handler.open("../data/Traveller/sealrelinK.txt", ios::in | ios::binary);
+bin_sealrelinK_handler.open("../data/Keys/sealrelinK.txt", ios::in | ios::binary);
 istream is_relin(&bin_sealrelinK_handler);
 relin_key.load(context,is_relin);
 bin_sealrelinK_handler.close();
 
 /* ********************Reading BootKey and KS keys *********************************************************** */
 
-FILE * boot_key_file = fopen("../data/Traveller/bootK.data" , "r"); 
+FILE * boot_key_file = fopen("../data/Keys/bootK.data" , "r"); 
 LweBootstrappingKey * boot_key = new_lweBootstrappingKey_fromFile(boot_key_file);
 LweBootstrappingKeyFFT * boot_key_fft = new_LweBootstrappingKeyFFT(boot_key);
 fclose(boot_key_file);
 //Key 1 -> Middle Key
-FILE * ks_med_key_file = fopen("../data/Traveller/KSKmed.data" , "r");
+FILE * ks_med_key_file = fopen("../data/Keys/KSKmed.data" , "r");
 LweKeySwitchKey * ks_med_key = new_lweKeySwitchKey_fromFile(ks_med_key_file);
 fclose(ks_med_key_file);
 // Middle Key -> HE Key
-FILE * ks_inout_key_file = fopen("../data/Traveller/KSKinout.data" , "r");
+FILE * ks_inout_key_file = fopen("../data/Keys/KSKinout.data" , "r");
 LweKeySwitchKey * ks_inout_key = new_lweKeySwitchKey_fromFile(ks_inout_key_file);
 fclose(ks_inout_key_file);
 // HE Key -> E-Gate Key
