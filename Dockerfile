@@ -55,6 +55,10 @@ COPY data/System_Parameters/ data/System_Parameters/
 COPY data/HEComp/             data/HEComp/
 COPY data/Traveller/          data/Traveller/
 COPY data/E-Gate/             data/E-Gate/
+COPY data/CountryDB/          data/CountryDB/
+COPY data/Keys/               data/Keys/    
+# Ensure the generated keys directory exists inside the image.
+#RUN mkdir -p data/Keys
 # --------------------------------------------------------------------------
 # 5. Runtime data directories (populated by API calls at run time)
 #    These are intentionally empty; mount Docker volumes here to persist

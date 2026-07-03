@@ -33,6 +33,7 @@ services:
     volumes:
       - safetravellers-countrydb:/app/data/CountryDB
       - safetravellers-egate:/app/data/E-Gate
+      - safetravellers-keys:/app/data/Keys
       - safetravellers-tmp:/app/tmp
     restart: unless-stopped
     healthcheck:
@@ -46,5 +47,6 @@ services:
 volumes:
   safetravellers-countrydb:
   safetravellers-egate:
+  safetravellers-keys:
   safetravellers-tmp:
 
