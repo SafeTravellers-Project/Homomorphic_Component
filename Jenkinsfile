@@ -20,15 +20,19 @@
 // ---------------------------------------------------------------------------
 
 pipeline {
-
-    agent any
+    agent {
+        node {
+            label 'safe-tr-tumbano'
+        }
+    }
 
     environment {
-        IMAGE_NAME     = "safetravellers-api"
-        HARBOR_REGISTRY = "${env.HARBOR_REGISTRY ?: 'harbor.safetravellers.example.com'}"
-        HARBOR_PROJECT  = "${env.HARBOR_PROJECT  ?: 'safetravellers'}"
+        IMAGE_NAME       = "safetravellers-api"
+        HARBOR_REGISTRY = "harbor.safetravellers.rid-intrasoft.eu"
+        HARBOR_PROJECT  = "security"
         FULL_IMAGE      = "${HARBOR_REGISTRY}/${HARBOR_PROJECT}/${IMAGE_NAME}"
-        GIT_SHORT_SHA   = ""   // populated in Checkout stage
+        HARBOR_CREDS    = credentials('harbor-creds')
+        GIT_SHORT_SHA   = ""
     }
 
     options {
@@ -38,121 +42,92 @@ pipeline {
     }
 
     stages {
-
-        // -------------------------------------------------------------------
         stage('Checkout') {
-        // -------------------------------------------------------------------
             steps {
                 checkout scm
                 script {
                     env.GIT_SHORT_SHA = sh(
-                        script: "git rev-parse --short HEAD",
+                        script: 'git rev-parse --short HEAD',
                         returnStdout: true
                     ).trim()
-                    echo "Building commit: ${env.GIT_SHORT_SHA}"
+
+                    echo "Branch: ${env.BRANCH_NAME}"
+                    echo "Commit: ${env.GIT_SHORT_SHA}"
                 }
             }
         }
 
-        // -------------------------------------------------------------------
-        stage('Build Image') {
-        // -------------------------------------------------------------------
+        stage('Docker Build') {
             steps {
-                script {
-                    docker.build(
-                        "${env.FULL_IMAGE}:${env.GIT_SHORT_SHA}",
-                        "--pull ."
-                    )
-                }
+                sh '''
+                    set -eux
+
+                    docker build --pull --no-cache \
+                      -t "$FULL_IMAGE:$GIT_SHORT_SHA" \
+                      -t "$FULL_IMAGE:latest" \
+                      .
+                '''
             }
         }
 
-        // -------------------------------------------------------------------
         stage('Test Health') {
-        // -------------------------------------------------------------------
             steps {
-                script {
-                    // Start the container with a throw-away API key
-                    def containerId = sh(
-                        script: """
-                            docker run -d --rm \
-                              -p 18080:8080 \
-                              -e SAFE_API_KEY=ci-test-key \
-                              --name safetravellers-ci-test \
-                              ${env.FULL_IMAGE}:${env.GIT_SHORT_SHA}
-                        """,
-                        returnStdout: true
-                    ).trim()
+                sh '''
+                    set -eux
 
-                    try {
-                        // Wait for the API to become ready (up to 30 s)
-                        timeout(time: 30, unit: 'SECONDS') {
-                            waitUntil {
-                                def status = sh(
-                                    script: "curl -s -o /dev/null -w '%{http_code}' http://localhost:18080/health",
-                                    returnStdout: true
-                                ).trim()
-                                return status == '200'
-                            }
-                        }
+                    docker rm -f safetravellers-ci-test || true
+
+                    docker run -d \
+                      -p 18080:8080 \
+                      -e SAFE_API_KEY=ci-test-key \
+                      --name safetravellers-ci-test \
+                      "$FULL_IMAGE:$GIT_SHORT_SHA"
+
+                    for i in $(seq 1 30); do
+                      status=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:18080/health || true)
+                      if [ "$status" = "200" ]; then
                         echo "Health check passed."
-                    } finally {
-                        sh "docker stop safetravellers-ci-test || true"
-                    }
-                }
+                        exit 0
+                      fi
+                      sleep 1
+                    done
+
+                    docker logs safetravellers-ci-test || true
+                    exit 1
+                '''
             }
         }
 
-        // -------------------------------------------------------------------
         stage('Push to Harbor') {
-        // -------------------------------------------------------------------
             steps {
-                script {
-                    docker.withRegistry("https://${env.HARBOR_REGISTRY}", 'harbor-credentials') {
-                        def img = docker.image("${env.FULL_IMAGE}:${env.GIT_SHORT_SHA}")
+                sh '''
+                    set -eux
 
-                        // Always push the commit-SHA tag
-                        img.push("${env.GIT_SHORT_SHA}")
+                    echo "$HARBOR_CREDS_PSW" | docker login "$HARBOR_REGISTRY" \
+                      -u "$HARBOR_CREDS_USR" \
+                      --password-stdin
 
-                        // Push "latest" only from the default branch
-                        if (env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master') {
-                            img.push("latest")
-                        }
-
-                        // Push a semver tag if a Git tag is present on this commit
-                        def gitTag = sh(
-                            script: "git tag --points-at HEAD | grep -E '^v[0-9]' | head -1 || true",
-                            returnStdout: true
-                        ).trim()
-                        if (gitTag) {
-                            img.push(gitTag)
-                            echo "Also pushed tag: ${gitTag}"
-                        }
-                    }
-                }
-            }
-        }
-
-        // -------------------------------------------------------------------
-        stage('Cleanup') {
-        // -------------------------------------------------------------------
-            steps {
-                sh "docker rmi ${env.FULL_IMAGE}:${env.GIT_SHORT_SHA} || true"
-                sh "docker image prune -f || true"
+                    docker push "$FULL_IMAGE:$GIT_SHORT_SHA"
+                    docker push "$FULL_IMAGE:latest"
+                '''
             }
         }
     }
 
     post {
-        success {
-            echo "Image pushed successfully: ${env.FULL_IMAGE}:${env.GIT_SHORT_SHA}"
-        }
-        failure {
-            echo "Pipeline failed. Check the logs above."
-        }
         always {
-            // Ensure the test container is not left running on any failure
-            sh "docker stop safetravellers-ci-test || true"
+            sh '''
+                docker rm -f safetravellers-ci-test || true
+                docker logout "$HARBOR_REGISTRY" || true
+            '''
+        }
+
+        success {
+            echo "Pushed: ${env.FULL_IMAGE}:${env.GIT_SHORT_SHA} and latest"
+        }
+
+        failure {
+            echo "Pipeline failed."
         }
     }
 }
