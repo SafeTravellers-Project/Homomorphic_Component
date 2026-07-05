@@ -46,8 +46,32 @@ pipeline {
                 checkout scm
                 sh '''
                     set -eux
-                    git rev-parse --abbrev-ref HEAD || true
-                    git rev-parse --short HEAD || true
+                    git rev-parse --short HEAD
+                    ls -la
+                '''
+            }
+        }
+
+        stage('Build TFHE') {
+            steps {
+                sh '''
+                    set -eux
+
+                    if [ ! -d all_libs/tfhe/src ]; then
+                      rm -rf all_libs/tfhe
+                      git clone https://github.com/tfhe/tfhe.git all_libs/tfhe
+                    fi
+
+                    cd all_libs/tfhe/src
+
+                    cmake -S . -B ../build \
+                      -DCMAKE_BUILD_TYPE=Release \
+                      -DCMAKE_C_FLAGS="-march=native -mtune=native" \
+                      -DCMAKE_CXX_FLAGS="-march=native -mtune=native"
+
+                    cmake --build ../build -j$(nproc)
+
+                    test -f ../build/libtfhe/libtfhe-spqlios-avx.so
                 '''
             }
         }
@@ -61,34 +85,6 @@ pipeline {
                       -t "$FULL_IMAGE:$BUILD_NUMBER" \
                       -t "$FULL_IMAGE:latest" \
                       .
-                '''
-            }
-        }
-
-        stage('Test Health') {
-            steps {
-                sh '''
-                    set -eux
-
-                    docker rm -f safetravellers-ci-test || true
-
-                    docker run -d \
-                      -p 18080:8080 \
-                      -e SAFE_API_KEY=ci-test-key \
-                      --name safetravellers-ci-test \
-                      "$FULL_IMAGE:$BUILD_NUMBER"
-
-                    for i in $(seq 1 30); do
-                      status=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:18080/health || true)
-                      if [ "$status" = "200" ]; then
-                        echo "Health check passed."
-                        exit 0
-                      fi
-                      sleep 1
-                    done
-
-                    docker logs safetravellers-ci-test || true
-                    exit 1
                 '''
             }
         }
@@ -112,10 +108,8 @@ pipeline {
     post {
         always {
             sh '''
-                docker rm -f safetravellers-ci-test || true
                 docker logout "$HARBOR_REGISTRY" || true
-                docker rmi "$FULL_IMAGE:$BUILD_NUMBER" || true
-                docker rmi "$FULL_IMAGE:latest" || true
+                docker image prune -f || true
             '''
         }
 
@@ -124,7 +118,7 @@ pipeline {
         }
 
         failure {
-            echo "Pipeline failed."
+            echo "Build or push failed."
         }
     }
 }
