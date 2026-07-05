@@ -32,7 +32,6 @@ pipeline {
         HARBOR_PROJECT  = "security"
         FULL_IMAGE      = "${HARBOR_REGISTRY}/${HARBOR_PROJECT}/${IMAGE_NAME}"
         HARBOR_CREDS    = credentials('harbor-creds')
-        GIT_SHORT_SHA   = ""
     }
 
     options {
@@ -45,15 +44,11 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
-                script {
-                    env.GIT_SHORT_SHA = sh(
-                        script: 'git rev-parse --short HEAD',
-                        returnStdout: true
-                    ).trim()
-
-                    echo "Branch: ${env.BRANCH_NAME}"
-                    echo "Commit: ${env.GIT_SHORT_SHA}"
-                }
+                sh '''
+                    set -eux
+                    git rev-parse --abbrev-ref HEAD || true
+                    git rev-parse --short HEAD || true
+                '''
             }
         }
 
@@ -63,7 +58,7 @@ pipeline {
                     set -eux
 
                     docker build --pull --no-cache \
-                      -t "$FULL_IMAGE:$GIT_SHORT_SHA" \
+                      -t "$FULL_IMAGE:$BUILD_NUMBER" \
                       -t "$FULL_IMAGE:latest" \
                       .
                 '''
@@ -81,7 +76,7 @@ pipeline {
                       -p 18080:8080 \
                       -e SAFE_API_KEY=ci-test-key \
                       --name safetravellers-ci-test \
-                      "$FULL_IMAGE:$GIT_SHORT_SHA"
+                      "$FULL_IMAGE:$BUILD_NUMBER"
 
                     for i in $(seq 1 30); do
                       status=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:18080/health || true)
@@ -107,7 +102,7 @@ pipeline {
                       -u "$HARBOR_CREDS_USR" \
                       --password-stdin
 
-                    docker push "$FULL_IMAGE:$GIT_SHORT_SHA"
+                    docker push "$FULL_IMAGE:$BUILD_NUMBER"
                     docker push "$FULL_IMAGE:latest"
                 '''
             }
@@ -119,11 +114,13 @@ pipeline {
             sh '''
                 docker rm -f safetravellers-ci-test || true
                 docker logout "$HARBOR_REGISTRY" || true
+                docker rmi "$FULL_IMAGE:$BUILD_NUMBER" || true
+                docker rmi "$FULL_IMAGE:latest" || true
             '''
         }
 
         success {
-            echo "Pushed: ${env.FULL_IMAGE}:${env.GIT_SHORT_SHA} and latest"
+            echo "Pushed: ${env.FULL_IMAGE}:${env.BUILD_NUMBER} and latest"
         }
 
         failure {
