@@ -32,6 +32,8 @@ pipeline {
         HARBOR_PROJECT  = "security"
         FULL_IMAGE      = "${HARBOR_REGISTRY}/${HARBOR_PROJECT}/${IMAGE_NAME}"
         HARBOR_CREDS    = credentials('harbor-creds')
+
+        BUILD_FLAGS     = "-march=x86-64-v3 -mtune=generic"
     }
 
     options {
@@ -52,6 +54,42 @@ pipeline {
             }
         }
 
+        stage('Clean Build Artifacts') {
+            steps {
+                sh '''
+                    set -eux
+
+                    rm -rf build
+                    rm -rf all_libs/SEAL/build
+                    rm -rf all_libs/tfhe/build
+
+                    mkdir -p bin
+                '''
+            }
+        }
+
+        stage('Build SEAL') {
+            steps {
+                sh '''
+                    set -eux
+
+                    test -d all_libs/SEAL
+
+                    cmake -S all_libs/SEAL -B all_libs/SEAL/build \
+                      -DCMAKE_BUILD_TYPE=Release \
+                      -DCMAKE_C_FLAGS="$BUILD_FLAGS" \
+                      -DCMAKE_CXX_FLAGS="$BUILD_FLAGS" \
+                      -DSEAL_BUILD_EXAMPLES=OFF \
+                      -DSEAL_BUILD_TESTS=OFF
+
+                    cmake --build all_libs/SEAL/build -j$(nproc)
+
+                    sudo cmake --install all_libs/SEAL/build
+                    sudo ldconfig
+                '''
+            }
+        }
+
         stage('Build TFHE') {
             steps {
                 sh '''
@@ -62,16 +100,48 @@ pipeline {
                       git clone https://github.com/tfhe/tfhe.git all_libs/tfhe
                     fi
 
-                    cd all_libs/tfhe/src
-
-                    cmake -S . -B ../build \
+                    cmake -S all_libs/tfhe/src -B all_libs/tfhe/build \
                       -DCMAKE_BUILD_TYPE=Release \
-                      -DCMAKE_C_FLAGS="-march=native -mtune=native" \
-                      -DCMAKE_CXX_FLAGS="-march=native -mtune=native"
+                      -DCMAKE_C_FLAGS="$BUILD_FLAGS" \
+                      -DCMAKE_CXX_FLAGS="$BUILD_FLAGS"
 
-                    cmake --build ../build -j$(nproc)
+                    cmake --build all_libs/tfhe/build -j$(nproc)
 
-                    test -f ../build/libtfhe/libtfhe-spqlios-avx.so
+                    test -f all_libs/tfhe/src/include/tfhe.h
+                    test -f all_libs/tfhe/build/libtfhe/libtfhe-spqlios-avx.so
+                '''
+            }
+        }
+
+        stage('Build Main Binaries') {
+            steps {
+                sh '''
+                    set -eux
+
+                    cmake -S . -B build \
+                      -DCMAKE_BUILD_TYPE=Release \
+                      -DCMAKE_C_FLAGS="$BUILD_FLAGS" \
+                      -DCMAKE_CXX_FLAGS="$BUILD_FLAGS"
+
+                    cmake --build build -j$(nproc)
+
+                    test -x bin/HESysInit
+                    test -x bin/Register
+                    test -x bin/EncBio
+                    test -x bin/Verify
+                '''
+            }
+        }
+
+        stage('Check AVX512 Not Present') {
+            steps {
+                sh '''
+                    set -eux
+
+                    if objdump -d bin/HESysInit | grep -Ei 'vmovdqu8|zmm|avx512' | head; then
+                      echo "ERROR: AVX512 instruction detected in HESysInit"
+                      exit 1
+                    fi
                 '''
             }
         }
