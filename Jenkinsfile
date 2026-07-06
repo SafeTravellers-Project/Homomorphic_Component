@@ -1,22 +1,30 @@
 // ---------------------------------------------------------------------------
 // Jenkinsfile — SAFETravellers HE Web Service
 //
-// Pipeline stages:
-//   1. Checkout        — clone from GitHub
-//   2. Build Image     — docker build from Dockerfile
-//   3. Test Health     — start container, hit /health, shut down
-//   4. Push to Harbor  — tag and push to the SAFETravellers Harbor registry
-//   5. Cleanup         — remove local image
+// Flow:
+//   1. Checkout        — Jenkins pulls HE_module_v4 from GitHub job SCM config
+//   2. Clean           — remove stale local build artifacts
+//   3. Build SEAL      — build Microsoft SEAL locally inside workspace
+//   4. Build TFHE      — clone/build TFHE locally if needed
+//   5. Validate libs   — verify TFHE / TFHE operators / OpenSSL artifacts exist
+//   6. Build binaries  — build HESysInit, Register, EncBio, Verify
+//   7. CPU check       — fail if AVX512 instructions are detected
+//   8. Docker build    — build image from Dockerfile
+//   9. Push Harbor     — push BUILD_NUMBER and latest tags
 //
-// Required Jenkins credentials (configure in Jenkins → Manage Credentials):
-//   harbor-credentials   : Username/Password for the Harbor registry
+// Required Jenkins credentials:
+//   harbor-creds : Username/Password for Harbor registry
 //
-// Required Jenkins environment variables (configure in Jenkins → System):
-//   HARBOR_REGISTRY      : Harbor registry host, e.g. harbor.safetravellers.example.com
-//   HARBOR_PROJECT       : Harbor project name, e.g. safetravellers
+// Jenkins job config:
+//   Repo   : https://github.com/SafeTravellers-Project/Homomorphic_Component.git
+//   Branch : */HE_module_v4
+//   Script : Jenkinsfile
 //
-// The pipeline tags the image with both the Git commit SHA and "latest".
-// On the main branch it also tags with the version from the git tag if present.
+// Important:
+//   - No sudo is used.
+//   - No docker Groovy plugin is used.
+//   - No deployment/recreate is done here.
+//   - This job only builds and pushes the image to Harbor.
 // ---------------------------------------------------------------------------
 
 pipeline {
@@ -40,6 +48,7 @@ pipeline {
         timestamps()
         timeout(time: 60, unit: 'MINUTES')
         disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '20'))
     }
 
     stages {
@@ -58,11 +67,9 @@ pipeline {
             steps {
                 sh '''
                     set -eux
-
                     rm -rf build
                     rm -rf all_libs/SEAL/build
                     rm -rf all_libs/tfhe/build
-
                     mkdir -p bin
                 '''
             }
@@ -84,8 +91,8 @@ pipeline {
 
                     cmake --build all_libs/SEAL/build -j$(nproc)
 
-                    sudo cmake --install all_libs/SEAL/build
-                    sudo ldconfig
+                    test -f all_libs/SEAL/build/lib/libseal-4.1.a
+                    test -d all_libs/SEAL/build/cmake
                 '''
             }
         }
@@ -109,6 +116,21 @@ pipeline {
 
                     test -f all_libs/tfhe/src/include/tfhe.h
                     test -f all_libs/tfhe/build/libtfhe/libtfhe-spqlios-avx.so
+                '''
+            }
+        }
+
+        stage('Validate Required Libraries') {
+            steps {
+                sh '''
+                    set -eux
+
+                    test -f all_libs/tfhe/build/libtfhe/libtfhe-spqlios-avx.so
+
+                    test -f all_libs/tfhe-operators-master/more_operations/build/lib/libmoretfheoperations.so
+                    test -f all_libs/tfhe-operators-master/new_tfhe/build/lib/libnewtfhe.so
+
+                    test -f all_libs/openssl-3.0.14/install/lib64/libcrypto.so
                 '''
             }
         }
@@ -184,7 +206,7 @@ pipeline {
         }
 
         success {
-            echo "Pushed: ${env.FULL_IMAGE}:${env.BUILD_NUMBER} and latest"
+            echo "Pushed: ${env.FULL_IMAGE}:${env.BUILD_NUMBER} and ${env.FULL_IMAGE}:latest"
         }
 
         failure {
