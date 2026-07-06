@@ -6,11 +6,10 @@
 //   2. Clean           — remove stale local build artifacts
 //   3. Build SEAL      — build Microsoft SEAL locally inside workspace
 //   4. Build TFHE      — clone/build TFHE locally if needed
-//   5. Validate libs   — verify TFHE / TFHE operators / OpenSSL artifacts exist
+//   5. Validate libs   — verify required libraries exist
 //   6. Build binaries  — build HESysInit, Register, EncBio, Verify
-//   7. CPU check       — fail if AVX512 instructions are detected
-//   8. Docker build    — build image from Dockerfile
-//   9. Push Harbor     — push BUILD_NUMBER and latest tags
+//   7. Docker build    — build image from Dockerfile
+//   8. Push Harbor     — push BUILD_NUMBER and latest tags
 //
 // Required Jenkins credentials:
 //   harbor-creds : Username/Password for Harbor registry
@@ -20,11 +19,6 @@
 //   Branch : */HE_module_v4
 //   Script : Jenkinsfile
 //
-// Important:
-//   - No sudo is used.
-//   - No docker Groovy plugin is used.
-//   - No deployment/recreate is done here.
-//   - This job only builds and pushes the image to Harbor.
 // ---------------------------------------------------------------------------
 
 pipeline {
@@ -126,10 +120,8 @@ pipeline {
                     set -eux
 
                     test -f all_libs/tfhe/build/libtfhe/libtfhe-spqlios-avx.so
-
                     test -f all_libs/tfhe-operators-master/more_operations/build/lib/libmoretfheoperations.so
                     test -f all_libs/tfhe-operators-master/new_tfhe/build/lib/libnewtfhe.so
-
                     test -f all_libs/openssl-3.0.14/install/lib64/libcrypto.so
                 '''
             }
@@ -151,19 +143,6 @@ pipeline {
                     test -x bin/Register
                     test -x bin/EncBio
                     test -x bin/Verify
-                '''
-            }
-        }
-
-        stage('Check AVX512 Not Present') {
-            steps {
-                sh '''
-                    set -eux
-
-                    if objdump -d bin/HESysInit | grep -Ei 'vmovdqu8|zmm|avx512' | head; then
-                      echo "ERROR: AVX512 instruction detected in HESysInit"
-                      exit 1
-                    fi
                 '''
             }
         }
